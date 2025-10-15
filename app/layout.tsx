@@ -23,7 +23,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="pastel">
+      <head>
+        {/* filled */}
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
+        {/* outlined */}
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"></link>
+     
+        {/* symbols */}
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"></link>
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet"></link>
+      
+      <link rel="preconnect" href="https://fonts.googleapis.com"></link>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous"></link> 
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"></link>
+      
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
