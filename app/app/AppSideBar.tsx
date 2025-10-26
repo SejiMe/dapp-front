@@ -1,31 +1,22 @@
+import AppLink from "@/components/app/AppLink";
+import Link from "next/link";
 import React from "react";
 
 type Props = {};
 
 const AppSideBar = (props: Props) => {
   return (
-    <aside className="w-56 bg-white border-r border-gray-200">
-      <div className="flex items-center gap-2 p-4 border-b border-gray-200">
-        <span className="text-xl">🎯</span>
-        <span className="font-semibold">D-APP</span>
-      </div>
-
-      <nav className="p-2">
-        <a
-          href="/"
-          className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-        >
+    <aside className=" hidden lg:block w-56 bg-white border-r border-gray-200">
+      <nav className="p-2 flex flex-1 flex-col gap-2">
+        <AppLink href="/app/home">
           <span>🏠</span>
           <span>Home</span>
-        </a>
+        </AppLink>
 
-        <a
-          href="/prediction"
-          className="flex items-center gap-3 px-4 py-3 bg-gray-200 text-gray-900 rounded-md font-medium"
-        >
+        <AppLink href="/app/dashboard">
           <span>📊</span>
           <span>Prediction</span>
-        </a>
+        </AppLink>
       </nav>
     </aside>
   );

@@ -1,9 +1,16 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type Props = {};
 
 const LoginPage = (props: Props) => {
+  const HandleTemp = () => {
+    redirect("/app/");
+  };
+
   return (
     <form action="submit">
       <fieldset className="fieldset">
@@ -36,11 +43,17 @@ const LoginPage = (props: Props) => {
         </div>
         <div>
           No Account? Sign up{" "}
-          <Link href="/auth/signup" className="link link-hover">
-            here!
+          <Link href="/auth/signup" className="link link-accent">
+            here
           </Link>
         </div>
-        <button className="btn btn-neutral mt-4">Login</button>
+        <button
+          type="button"
+          onClick={HandleTemp}
+          className="btn btn-neutral mt-4"
+        >
+          Login
+        </button>
       </fieldset>
     </form>
   );

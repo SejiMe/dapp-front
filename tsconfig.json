@@ -20,7 +20,11 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@libraries/*": ["./libraries/*"],
+      "@library-ui/*": ["./libraries/ui/*"],
+      "@library-api/*": ["./libraries/api/*"],
+      "@library-hooks/*": ["./libraries/hooks/*"],
+      "@library-supabase/*": ["./libraries/supabase/*"],
+      "@library-serializer/*": ["./libraries/serializer/*"],
       "@components/*": ["./components/*"],
       "@models/*": ["./models/*"]
     }
