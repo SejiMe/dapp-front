@@ -1,3 +1,5 @@
+import { ProblemDetails, ProblemDetailsError } from "@/models/ProblemDetails";
+
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 export async function apiFetch<T>(
@@ -15,8 +17,8 @@ export async function apiFetch<T>(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API Error: ${response.status} ${errorText}`);
+    const errorResponse = (await response.json()) as ProblemDetails;
+    throw new ProblemDetailsError(errorResponse);
   }
 
   return response.json() as Promise<T>;

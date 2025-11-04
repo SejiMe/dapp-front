@@ -1,3 +1,4 @@
+import { YearlyHistoricalDengueCases } from "@/models/HistoricalDengueCase";
 import { DecimationAlgorithm } from "chart.js";
 
 export type Probability = {
@@ -5,6 +6,52 @@ export type Probability = {
   iso_week: number;
   iso_year: number;
   probability: number;
+};
+
+export const SampleData: YearlyHistoricalDengueCases = {
+  psgccode: "0931700001",
+  totalDengueCases: [
+    {
+      year: "2014",
+      totalCases: 12,
+    },
+    {
+      year: "2015",
+      totalCases: 19,
+    },
+    {
+      year: "2016",
+      totalCases: 34,
+    },
+    {
+      year: "2017",
+      totalCases: 29,
+    },
+    {
+      year: "2018",
+      totalCases: 15,
+    },
+    {
+      year: "2019",
+      totalCases: 37,
+    },
+    {
+      year: "2020",
+      totalCases: 2,
+    },
+    {
+      year: "2021",
+      totalCases: 37,
+    },
+    {
+      year: "2022",
+      totalCases: 12,
+    },
+    {
+      year: "2023",
+      totalCases: 3,
+    },
+  ],
 };
 
 export const ProbabilitySampleData: Probability[] = [

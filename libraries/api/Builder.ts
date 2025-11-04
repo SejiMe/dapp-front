@@ -21,6 +21,7 @@ export class APIBuilder {
   }
 
   get<T>(path = "", query?: QueryParams, options?: RequestInit) {
+    console.log(path);
     return apiFetch<T>(this.buildUrl(path, query), {
       ...options,
       method: "GET",

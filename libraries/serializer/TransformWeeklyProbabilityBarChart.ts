@@ -1,4 +1,5 @@
 import { Probability } from "@/data/DengueProbability";
+import { getChartColors } from "../ui/chart-theme";
 
 export const TransformToWeeklyBarChart = (data: Probability[]) => {
   // Find month boundaries
@@ -25,16 +26,18 @@ export const TransformToWeeklyBarChart = (data: Probability[]) => {
       });
     }
   });
-
+  const colors = getChartColors();
   return {
     labels: data.map((item) => `Week ${item.iso_week}`),
     datasets: [
       {
         label: "Probability (%)",
         data: data.map((item) => item.probability),
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
+        backgroundColor: colors.primary.replace("0.7", "0.9"),
+        borderColor: colors.primary.replace("0.7", "1"),
+        borderWidth: 0.5,
+        borderRadius: 60,
+        barThickness: 10, // 👈 fixed bar width (px)
       },
     ],
     monthBoundaries,

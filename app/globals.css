@@ -1,6 +1,8 @@
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
 @import "tailwindcss";
 @plugin "daisyui";
-
 
 @plugin "daisyui/theme" {
   name: "pastel";
@@ -36,7 +38,6 @@
   --depth: 1;
   --noise: 0;
 }
-
 
 :root {
   --background: #ffffff;

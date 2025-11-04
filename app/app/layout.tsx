@@ -8,7 +8,7 @@ export default function SigningLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className=" h-screen bg-gray-100">
+    <div className=" h-full bg-gray-100">
       {/* Header */}
       <AppHeader />
 

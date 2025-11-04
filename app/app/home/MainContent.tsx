@@ -6,7 +6,7 @@ type Props = {};
 
 const MainContent = (props: Props) => {
   return (
-    <div className="h-full">
+    <div className="h-screen">
       <div className="flex flex-col lg:justify-between lg:items-center lg:flex-row-reverse">
         <Image
           width={500}

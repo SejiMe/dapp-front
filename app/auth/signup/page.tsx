@@ -1,6 +1,6 @@
 "use client";
 
-import { Localities } from "@/libraries/api/DengueAPI";
+import { Localities } from "@/libraries/api/AdministrativeAreaAPI";
 import React, { useState } from "react";
 import useSWR from "swr";
 

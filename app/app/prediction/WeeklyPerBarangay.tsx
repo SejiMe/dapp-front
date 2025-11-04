@@ -1,24 +1,11 @@
 import ChartComponent from "@/components/app/ChartComponent";
 import { ProbabilitySampleData } from "@/data/DengueProbability";
 import React from "react";
-import { TransformToWeeklyBarChart } from "@library-serializer/WeeklyProbabilityBarChart";
+import { TransformToWeeklyBarChart } from "@/libraries/serializer/TransformWeeklyProbabilityBarChart";
+import WeeklyChartPerBarangay from "./WeeklyChartPerBarangay";
 type Props = {};
 
 const WeeklyPerBarangay = (props: Props) => {
-  const options = {
-    plugins: {
-      legend: {
-        display: true,
-        position: "top" as const,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-
   return (
     <div>
       <form className="flex flex-1 justify-between">
@@ -50,13 +37,14 @@ const WeeklyPerBarangay = (props: Props) => {
       </form>
 
       <div className="card-body">
-        <h2 className="card-title">Quarterly Revenue</h2>
-        <ChartComponent
+        <h2 className="card-title">Dengue Cases</h2>
+        {/* <ChartComponent
           type="bar"
           data={TransformToWeeklyBarChart(ProbabilitySampleData)}
           options={options}
           height={350}
-        />
+        /> */}
+        <WeeklyChartPerBarangay key={1} data={ProbabilitySampleData} />
       </div>
     </div>
   );
