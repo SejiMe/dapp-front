@@ -1,8 +1,12 @@
+import { redirect } from "next/navigation";
 import React from "react";
 
 type Props = {};
 
 const AppHeader = (props: Props) => {
+  const handleMonthNavigation = () => {
+    redirect("/app/calendar");
+  };
   return (
     <header className="bg-white justify-between flex border-b border-gray-200 px-6">
       <div className="flex items-center gap-2 border-gray-200">
@@ -15,7 +19,10 @@ const AppHeader = (props: Props) => {
       </div>
 
       <div className="flex items-center justify-end gap-4">
-        <button className="btn btn-ghost p-2 text-base-content hover:text-info-content hover:bg-accent rounded-md transition-colors">
+        <button
+          onClick={handleMonthNavigation}
+          className="btn btn-ghost p-2 text-base-content hover:text-info-content hover:bg-accent rounded-md transition-colors"
+        >
           <span className="material-symbols-outlined">calendar_month</span>
         </button>
 
