@@ -1,14 +1,14 @@
 "use client";
 
 import useSWR, { SWRConfiguration } from "swr";
-import { apiFetch } from "@libraries/hooks";
+import { apiClient } from "@/libraries/api/Client";
 
 export function useFetch<T>(
   endpoint: string | null,
   options?: RequestInit,
   config?: SWRConfiguration
 ) {
-  const fetcher = async (url: string) => apiFetch<T>(url, options);
+  const fetcher = async (url: string) => apiClient.request<T>(url, options);
 
   const { data, error, isLoading, mutate } = useSWR<T>(
     endpoint,

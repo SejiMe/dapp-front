@@ -1,34 +1,38 @@
-import ChartComponent from "@/components/app/ChartComponent";
-import { ProbabilitySampleData } from "@/data/DengueProbability";
 import React from "react";
-import { TransformToWeeklyBarChart } from "@/libraries/serializer/TransformWeeklyProbabilityBarChart";
-import WeeklyChartPerBarangay from "./WeeklyChartPerBarangay";
+import PredictionChart from "@/components/app/charts/PredictionChart";
+import { Probability, ProbabilitySampleData } from "@/data/DengueProbability";
+
 type Props = {};
 
-const WeeklyPerBarangay = (props: Props) => {
+const WeeklyPerBarangay = ({ data }: { data: Probability[] }) => {
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <form className="flex flex-1 justify-between">
         <div className="flex flex-col">
-          <label htmlFor="select_timeline">Timeline</label>
+          <label htmlFor="select_timeline" className="label">
+            <span className="label-text">Timeline</span>
+          </label>
           <select
-            name=""
             id="select_timeline"
-            className="select select-primary"
+            className="select select-primary w-full"
+            defaultValue="2025"
           >
-            <option defaultValue="2025">Current Year</option>
+            <option value="2025">Current Year</option>
             <option value="2024">Last Year</option>
           </select>
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="select_barangay">Barangay</label>
+          <label htmlFor="select_barangay" className="label">
+            <span className="label-text">Barangay</span>
+          </label>
           <select
-            name=""
             id="select_barangay"
-            className="select select-primary"
+            className="select select-primary w-full"
+            defaultValue="N/a"
+            disabled
           >
-            <option defaultValue="N/a" disabled>
+            <option value="N/a" disabled>
               Select Barangay
             </option>
             <option value="123">Arena Blanco</option>
@@ -36,16 +40,7 @@ const WeeklyPerBarangay = (props: Props) => {
         </div>
       </form>
 
-      <div className="card-body">
-        <h2 className="card-title">Dengue Cases</h2>
-        {/* <ChartComponent
-          type="bar"
-          data={TransformToWeeklyBarChart(ProbabilitySampleData)}
-          options={options}
-          height={350}
-        /> */}
-        <WeeklyChartPerBarangay key={1} data={ProbabilitySampleData} />
-      </div>
+      <PredictionChart data={data} height={450} showRiskLevels={true} />
     </div>
   );
 };

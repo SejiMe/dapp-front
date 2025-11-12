@@ -3,33 +3,10 @@ import React from "react";
 import MainContent from "./MainContent";
 import { HistoricalDengueCases } from "@/libraries/api/HistoricalDengueAPI";
 import useSWR from "swr";
-import YearlyDengueChart from "./HistoricalYearlyCaseComponent";
-import HistoricalYearlyCaseComponent from "./HistoricalYearlyCaseComponent";
+import HistoricalCasesChart from "@/components/app/charts/HistoricalCasesChart";
 import { SampleData } from "@/data/DengueProbability";
 
 type Props = {};
-
-// const HomePage = (props: Props) => {
-//   const {
-//     data: historicalData,
-//     error: FetchError,
-//     isLoading,
-//   } = useSWR("HistoricalDengue", () =>
-//     HistoricalDengueCases.getYearlyHistorical("0931700001")
-//   );
-//   // console.info(historicalData);
-//   // console.log(`From Page: ${historicalData?.TotalDengueCases}`);
-//   return (
-//     <div className="p-2 rounded-xl bg-white h-full">
-//       <MainContent />
-//       {isLoading ? (
-//         <p>Loading Data</p>
-//       ) : (
-//         <HistoricalYearlyCaseComponent data={historicalData} />
-//       )}
-//     </div>
-//   );
-// };
 
 const HomePage = () => {
   const {
@@ -51,7 +28,14 @@ const HomePage = () => {
   return (
     <div className="p-2 rounded-xl bg-white flex gap-2 flex-col">
       <MainContent />
-      <HistoricalYearlyCaseComponent data={historicalData} />
+
+      {historicalData !== undefined && (
+        <HistoricalCasesChart
+          data={historicalData}
+          height={400}
+          showTrend={true}
+        />
+      )}
     </div>
   );
 };

@@ -1,61 +1,79 @@
-import { apiFetch } from "./Client";
+import { apiClient } from "./Client";
 
 type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
 export class APIBuilder {
-  constructor(private basePath: string) {}
+  constructor(
+    private basePath: string,
+    private defaultParams: Record<string, any> = {}
+  ) {}
 
   private buildUrl(path = "", query?: QueryParams): string {
-    console.log("base path in builder: " + this.basePath);
     const url = new URL(`${this.basePath}${path}`);
 
-    if (query) {
-      Object.entries(query).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
-    }
+    // Merge default params with query params
+    const allParams = { ...this.defaultParams, ...query };
 
-    return this.basePath + url.pathname + url.search;
+    Object.entries(allParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, String(value));
+      }
+    });
+
+    return url.toString();
   }
 
-  get<T>(path = "", query?: QueryParams, options?: RequestInit) {
-    console.log(path);
-    return apiFetch<T>(this.buildUrl(path, query), {
+  async get<T>(path = "", query?: QueryParams, options?: RequestInit) {
+    console.log(`GET: ${this.buildUrl(path, query)}`);
+    return apiClient.get<T>(this.buildUrl(path, query), {
       ...options,
       method: "GET",
     });
   }
 
-  post<T>(path = "", body?: unknown, options?: RequestInit) {
-    return apiFetch<T>(this.basePath + path, {
+  async post<T>(path = "", body?: unknown, options?: RequestInit) {
+    console.log(`POST: ${this.buildUrl(path)}`);
+    return apiClient.post<T>(this.buildUrl(path), body, {
       ...options,
       method: "POST",
-      body: JSON.stringify(body),
     });
   }
 
-  put<T>(path = "", body?: unknown, options?: RequestInit) {
-    return apiFetch<T>(this.basePath + path, {
+  async put<T>(path = "", body?: unknown, options?: RequestInit) {
+    console.log(`PUT: ${this.buildUrl(path)}`);
+    return apiClient.put<T>(this.buildUrl(path), body, {
       ...options,
       method: "PUT",
-      body: JSON.stringify(body),
     });
   }
 
-  patch<T>(path = "", body?: unknown, options?: RequestInit) {
-    return apiFetch<T>(this.basePath + path, {
+  async patch<T>(path = "", body?: unknown, options?: RequestInit) {
+    console.log(`PATCH: ${this.buildUrl(path)}`);
+    return apiClient.patch<T>(this.buildUrl(path), body, {
       ...options,
       method: "PATCH",
-      body: JSON.stringify(body),
     });
   }
 
-  delete<T>(path = "", options?: RequestInit) {
-    return apiFetch<T>(this.basePath + path, { ...options, method: "DELETE" });
+  async delete<T>(path = "", options?: RequestInit) {
+    console.log(`DELETE: ${this.buildUrl(path)}`);
+    return apiClient.delete<T>(this.buildUrl(path), {
+      ...options,
+      method: "DELETE",
+    });
   }
 
+  // Set default parameters for all requests
+  setDefaultParams(params: Record<string, any>) {
+    this.defaultParams = { ...this.defaultParams, ...params };
+  }
+
+  // Get current default parameters
+  getDefaultParams() {
+    return { ...this.defaultParams };
+  }
+
+  // Check base path
   checkBasePath() {
     return this.basePath;
   }

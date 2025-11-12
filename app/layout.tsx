@@ -1,6 +1,29 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+} from "@mantine/core";
+// @ts-ignore: allow side-effect CSS import without type declarations
 import "./globals.css";
+import "@mantine/core/styles.css";
+
+import "@mantine/core/styles/ScrollArea.css";
+import "@mantine/core/styles/UnstyledButton.css";
+import "@mantine/core/styles/VisuallyHidden.css";
+import "@mantine/core/styles/Paper.css";
+import "@mantine/core/styles/Popover.css";
+import "@mantine/core/styles/CloseButton.css";
+import "@mantine/core/styles/Group.css";
+import "@mantine/core/styles/Loader.css";
+import "@mantine/core/styles/Overlay.css";
+import "@mantine/core/styles/ModalBase.css";
+import "@mantine/core/styles/Input.css";
+import "@mantine/core/styles/InlineInput.css";
+import "@mantine/core/styles/Flex.css";
+import "@mantine/core/styles/FloatingIndicator.css";
+import "@mantine/core/styles/ActionIcon.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,24 +48,43 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="pastel">
       <head>
+        <ColorSchemeScript />
         {/* filled */}
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet"
+        ></link>
         {/* outlined */}
-      <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"></link>
-     
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+          rel="stylesheet"
+        ></link>
+
         {/* symbols */}
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"></link>
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet"></link>
-      
-      <link rel="preconnect" href="https://fonts.googleapis.com"></link>
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous"></link> 
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"></link>
-      
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+          rel="stylesheet"
+        ></link>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+          rel="stylesheet"
+        ></link>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com"></link>
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        ></link>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet"
+        ></link>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <MantineProvider>{children}</MantineProvider>
       </body>
     </html>
   );

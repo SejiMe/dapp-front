@@ -12,6 +12,9 @@ export function getChartColors() {
       warning: "rgba(251, 191, 36, 0.7)",
       error: "rgba(248, 113, 113, 0.7)",
       info: "rgba(96, 165, 250, 0.7)",
+      // Additional colors needed for charts
+      base300: "rgba(209, 213, 219, 0.7)",
+      foreground: "rgba(31, 41, 55, 0.7)",
     };
   }
 
@@ -101,5 +104,8 @@ export function getChartColors() {
     warning: oklchToRgba("--color-warning"),
     error: oklchToRgba("--color-error"),
     info: oklchToRgba("--color-info"),
+    // Additional colors needed for charts
+    base300: oklchToRgba("--color-base-300"),
+    foreground: oklchToRgba("--color-foreground"),
   };
 }
