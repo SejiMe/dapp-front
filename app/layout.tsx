@@ -8,7 +8,6 @@ import {
 // @ts-ignore: allow side-effect CSS import without type declarations
 import "./globals.css";
 import "@mantine/core/styles.css";
-
 import "@mantine/core/styles/ScrollArea.css";
 import "@mantine/core/styles/UnstyledButton.css";
 import "@mantine/core/styles/VisuallyHidden.css";
@@ -24,6 +23,7 @@ import "@mantine/core/styles/InlineInput.css";
 import "@mantine/core/styles/Flex.css";
 import "@mantine/core/styles/FloatingIndicator.css";
 import "@mantine/core/styles/ActionIcon.css";
+import "@mantine/dates/styles.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="pastel">
+    <html lang="en" data-theme="pastel" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
         {/* filled */}

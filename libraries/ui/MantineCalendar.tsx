@@ -25,31 +25,6 @@ interface MantineCalendarProps {
   highlightDates?: Date[];
 }
 
-function getDay(date: string) {
-  const day = dayjs(date).day();
-  return day === 0 ? 6 : day - 1;
-}
-
-function startOfWeek(date: string) {
-  return dayjs(date)
-    .subtract(getDay(date) + 1, "day")
-    .toDate();
-}
-
-function endOfWeek(date: string) {
-  return dayjs(date)
-    .add(6 - getDay(date), "day")
-    .endOf("day")
-    .toDate();
-}
-
-function isInWeekRange(date: string, value: string | null) {
-  return value
-    ? dayjs(date).isBefore(endOfWeek(value)) &&
-        dayjs(date).isAfter(startOfWeek(value))
-    : false;
-}
-
 export const MantineCalendar = ({
   className = "",
   maxDate,
@@ -62,80 +37,53 @@ export const MantineCalendar = ({
   const colors = getDaisyUIColors();
   const [hovered, setHovered] = useState<string | null>(null);
 
-  // Helper function to get theme color
-  const getThemeColor = (variable: string): string => {
-    if (typeof window === "undefined") return "#000000";
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(variable)
-      .trim();
-  };
-
   return (
     <div
-      className={`bg-base-100 rounded-box shadow-lg p-4 ${className}`}
-      style={{
-        backgroundColor: colors.background,
-        borderColor: colors.base300,
-        borderWidth: "1.5px",
-        borderStyle: "solid",
-        borderRadius: "0.5rem",
-      }}
+      className={`bg-white rounded-box shadow-lg p-4 w-full h-full lg:h-[60vh] flex flex-col ${className}`}
     >
-      <Calendar
-        styles={{
-          weekday: {
-            color: colors.foreground,
-            fontWeight: "bold",
-            fontSize: "0.875rem",
-          },
+      <div className="w-full flex flex-col-reverse lg:flex-row lg:gap-4 place-items-center">
+        <Calendar
+          styles={{
+            weekday: {
+              color: "ActiveBorder",
+              fontWeight: "bold",
+              fontSize: "1.4rem",
+            },
+          }}
+          firstDayOfWeek={1} // Monday
+          weekendDays={[0, 6]} // Saturday and Sunday
+          size="xl"
+          withCellSpacing={false}
+          getDayProps={(date) => {
+            const dateString = dayjs(date).format("YYYY-MM-DD");
+            const isHovered =
+              isInISOWeekRange(dateString) && hovered
+                ? isInISOWeekRange(hovered)
+                : false;
+            const isSelected = isInISOWeekRange(dateString);
+            const isInRange = isHovered || isSelected;
 
-          // weekendDays: {
-          //   color: colors.neutral,
-          // },
-          // selected: {
-          //   backgroundColor: colors.primary,
-          //   color: getThemeColor("--color-primary-content"),
-          //   fontWeight: "bold",
-          // },
-          // inRange: {
-          //   backgroundColor: colors.primary + "20", // Add transparency
-          // },
-          // disabled: {
-          //   color: colors.base300,
-          //   textDecoration: "line-through",
-          // },
-          // outside: {
-          //   color: colors.base300,
-          // },
-          // today: {
-          //   borderColor: colors.accent,
-          //   borderWidth: "2px",
-          // },
-        }}
-        firstDayOfWeek={1} // Monday
-        weekendDays={[0, 6]} // Saturday and Sunday
-        size="md"
-        withCellSpacing={false}
-        getDayProps={(date) => {
-          const dateString = dayjs(date).format("YYYY-MM-DD");
-          const isHovered =
-            isInISOWeekRange(dateString) && hovered
-              ? isInISOWeekRange(hovered)
-              : false;
-          const isSelected = isInISOWeekRange(dateString);
-          const isInRange = isHovered || isSelected;
-
-          return {
-            onMouseEnter: () => setHovered(dateString),
-            onMouseLeave: () => setHovered(null),
-            inRange: isInRange,
-            firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
-            lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday
-            selected: isSelected,
-            onClick: () => selectDate(new Date(date)),
-          };
-        }}
-      />
+            return {
+              onMouseEnter: () => setHovered(dateString),
+              onMouseLeave: () => setHovered(null),
+              inRange: isInRange,
+              firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
+              lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday
+              selected: isSelected,
+              onClick: () => selectDate(new Date(date)),
+            };
+          }}
+        />
+        <div className="alert alert-info mt-3 text-sm justify-center">
+          <span className="material-symbols-outlined">psychiatry</span>
+          <p>
+            <strong>Disclaimer:</strong> The selected date will be converted to
+            its corresponding ISO week for prediction purposes. Forecasts are
+            based on weekly data and include a two-week lag in weather
+            information.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

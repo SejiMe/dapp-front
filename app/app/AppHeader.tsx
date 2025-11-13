@@ -8,7 +8,7 @@ const AppHeader = (props: Props) => {
     redirect("/app/calendar");
   };
   return (
-    <header className="bg-white justify-between flex border-b border-gray-200 px-6">
+    <header className="z-50 bg-white justify-between flex border-b border-gray-200 px-6 shrink-0">
       <div className="flex items-center gap-2 border-gray-200">
         <img
           src={"/logo/mosquito.svg"}

@@ -1,7 +1,9 @@
 "use client";
 
+import { redirect } from "next/navigation";
 import { useCalendar } from "./../CalendarContext";
 import MantineCalendar from "@/libraries/ui/MantineCalendar";
+import AppLink from "@/components/app/AppLink";
 
 export default function CalendarPage() {
   const {
@@ -14,9 +16,13 @@ export default function CalendarPage() {
     rangeDates,
   } = useCalendar();
 
+  const handleRedirection = () => {
+    redirect("");
+  };
+
   return (
     <div className="flex flex-col h-screen bg-base-100 items-center space-y-4 p-6">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-4xl flex flex-col gap-4">
         <MantineCalendar
           className="w-full"
           allowSingleDateSelection={true}
@@ -26,13 +32,20 @@ export default function CalendarPage() {
             new Date("2024-12-25"),
             new Date("2024-01-01"),
           ]}
-          excludeDates={[
-            // Example excluded dates - can be populated from API
-            new Date("2024-12-31"),
-          ]}
+          // excludeDates={[
+          //   // Example excluded dates - can be populated from API
+          //   new Date("2024-12-31"),
+          // ]}
         />
-
-        <div className="card bg-base-200 w-full p-4 shadow mt-6">
+        <div className="card ">
+          <AppLink
+            href="/app/prediction"
+            className="btn btn-info text-info-content text-lg tracking-wide"
+          >
+            Start Predicting
+          </AppLink>
+        </div>
+        {/* <div className="card bg-base-200 w-full p-4 shadow mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-base-content">
@@ -70,7 +83,7 @@ export default function CalendarPage() {
               <p className="text-base-content">{getStringDate || "N/A"}</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

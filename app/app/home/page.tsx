@@ -5,6 +5,7 @@ import { HistoricalDengueCases } from "@/libraries/api/HistoricalDengueAPI";
 import useSWR from "swr";
 import HistoricalCasesChart from "@/components/app/charts/HistoricalCasesChart";
 import { SampleData } from "@/data/DengueProbability";
+import { Center, Loader } from "@mantine/core";
 
 type Props = {};
 
@@ -22,13 +23,16 @@ const HomePage = () => {
   console.log("Data structure:", historicalData);
   console.log("TotalDengueCases:", historicalData?.totalDengueCases);
 
-  if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error loading dengue data</p>;
 
   return (
     <div className="p-2 rounded-xl bg-white flex gap-2 flex-col">
       <MainContent />
-
+      {isLoading && (
+        <Center>
+          <Loader color="gray" size="xl" type="dots" />
+        </Center>
+      )}
       {historicalData !== undefined && (
         <HistoricalCasesChart
           data={historicalData}
