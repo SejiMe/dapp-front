@@ -20,7 +20,7 @@ export const Localities = {
   },
   getAllBarangaysByPsgccode: (psgccode: string) => {
     const brgys = api.get<AdministrativeArea[]>(
-      `/api/administrative-areas/localities/${psgccode}`
+      `/api/administrative-areas/localities/${psgccode}/barangays`
     );
     return brgys;
   },
