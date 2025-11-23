@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import WeeklyPerBarangay from "./WeeklyPerBarangay";
 import { ProbabilitySampleData } from "@/data/DengueProbability";
 import useSWR from "swr";
@@ -63,9 +63,10 @@ const DashboardPage = (props: Props) => {
           </select>
         </div>
 
-        <button className="btn btn-primary text-warning-content place-self-center">
+        {/* For Debugging only */}
+        {/* <button className="hidden btn btn-primary text-warning-content place-self-center">
           Generate Data
-        </button>
+        </button> */}
       </div>
 
       <div className="tabs tabs-border flex">

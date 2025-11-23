@@ -1,4 +1,4 @@
-import { DengueCase } from "@models/DengueCase";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 
 /**
  * Risk level categories for dengue prediction
@@ -291,7 +291,7 @@ export class DengueRiskAssessment {
    * Comprehensive risk assessment for a dengue case
    */
   static assessRisk(
-    dengueCase: DengueCase,
+    dengueCase: PredictedDengueCase,
     historicalAverage?: number
   ): RiskAssessmentResult {
     const predictionValue = dengueCase.outbreak_probability;
@@ -399,7 +399,7 @@ export class DengueRiskAssessment {
  * Convenience functions for quick access to common operations
  */
 export const assessDengueRisk = (
-  dengueCase: DengueCase,
+  dengueCase: PredictedDengueCase,
   historicalAverage?: number
 ) => DengueRiskAssessment.assessRisk(dengueCase, historicalAverage);
 

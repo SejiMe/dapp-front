@@ -4,10 +4,10 @@ import { getChartColors } from "../ui/chart-theme";
 export function TransformToYearlyCasesToChart(
   data?: YearlyHistoricalDengueCases
 ) {
-  const cases = data?.totalDengueCases ?? [];
+  const cases = data?.recorded_cases ?? [];
   const colors = getChartColors();
   const labels = cases?.map((x) => x.year);
-  const values = cases?.map((x) => x.totalCases);
+  const values = cases?.map((x) => x.total_cases);
   console.log(colors);
   return {
     labels,

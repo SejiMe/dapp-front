@@ -58,13 +58,13 @@ export const HistoricalCasesChart = ({
           <div className="mt-4 p-3 bg-base-200 rounded-lg">
             <p className="text-sm text-base-content">
               <span className="font-semibold">Trend Analysis:</span>
-              {data.totalDengueCases.length > 1 && (
+              {data.recorded_cases.length > 1 && (
                 <>
                   {" "}
-                  {data.totalDengueCases[data.totalDengueCases.length - 1]
-                    .totalCases >
-                  data.totalDengueCases[data.totalDengueCases.length - 2]
-                    .totalCases
+                  {data.recorded_cases[data.recorded_cases.length - 1]
+                    .total_cases >
+                  data.recorded_cases[data.recorded_cases.length - 2]
+                    .total_cases
                     ? "↑ Increasing"
                     : "↓ Decreasing"}
                   {" trend compared to previous year"}

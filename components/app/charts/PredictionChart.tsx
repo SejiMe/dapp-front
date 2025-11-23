@@ -2,12 +2,13 @@
 
 import React from "react";
 import { BaseChart } from "./BaseChart";
-import { Probability } from "@/data/DengueProbability";
-import { TransformToWeeklyBarChart } from "@/libraries/serializer/TransformWeeklyProbabilityBarChart";
+import { ProbabilitySampleData } from "@/data/DengueProbability";
+import { TransformWeeklyOutbreakProbabilityBarChart } from "@/libraries/serializer/TransformWeeklyOutbreakProbabilityBarChart";
 import { cn } from "@/libraries/ui/CnExtension";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 
 interface PredictionChartProps {
-  data: Probability[];
+  data: PredictedDengueCase[];
   height?: number;
   showRiskLevels?: boolean;
   className?: string;
@@ -19,7 +20,8 @@ export const PredictionChart = ({
   showRiskLevels = true,
   className = "",
 }: PredictionChartProps) => {
-  const { labels, datasets, monthBoundaries } = TransformToWeeklyBarChart(data);
+  const { labels, datasets, monthBoundaries } =
+    TransformWeeklyOutbreakProbabilityBarChart(data);
 
   // Create custom plugin for month labels
   const monthLabelPlugin = {
@@ -31,8 +33,16 @@ export const PredictionChart = ({
       ctx.save();
 
       monthBoundaries.forEach((boundary: any, index: number) => {
-        const startPixel = xScale.getPixelForValue(boundary.start);
-        const endPixel = xScale.getPixelForValue(boundary.end);
+        // Find the label indices for the start and end weeks
+        const startLabelIndex = labels.findIndex(
+          (label) => label === `Week ${boundary.startWeek}`
+        );
+        const endLabelIndex = labels.findIndex(
+          (label) => label === `Week ${boundary.endWeek}`
+        );
+
+        const startPixel = xScale.getPixelForValue(startLabelIndex);
+        const endPixel = xScale.getPixelForValue(endLabelIndex);
         const centerX = (startPixel + endPixel) / 2;
 
         // Draw month label
@@ -47,8 +57,13 @@ export const PredictionChart = ({
 
         // Draw separator line (except for last month)
         if (index < monthBoundaries.length - 1) {
+          const nextBoundary = monthBoundaries[index + 1];
+          const nextStartLabelIndex = labels.findIndex(
+            (label) => label === `Week ${nextBoundary.startWeek}`
+          );
           const separatorX =
-            (endPixel + xScale.getPixelForValue(boundary.end + 1)) / 2;
+            (endPixel + xScale.getPixelForValue(nextStartLabelIndex)) / 2;
+
           ctx.strokeStyle = "rgba(209, 213, 219, 0.5)";
           ctx.lineWidth = 1;
           ctx.setLineDash([5, 5]);
@@ -70,14 +85,14 @@ export const PredictionChart = ({
     datasets: datasets.map((dataset) => ({
       ...dataset,
       backgroundColor: data.map((item) => {
-        const probability = item.probability;
+        const probability = item.outbreak_probability;
         if (probability >= 80) return "#ef4444"; // error
         if (probability >= 60) return "#f59e0b"; // warning
         if (probability >= 40) return "#3b82f6"; // info
         return "#10b981"; // success
       }),
       borderColor: data.map((item) => {
-        const probability = item.probability;
+        const probability = item.outbreak_probability;
         if (probability >= 80) return "#ef4444"; // error
         if (probability >= 60) return "#f59e0b"; // warning
         if (probability >= 40) return "#3b82f6"; // info

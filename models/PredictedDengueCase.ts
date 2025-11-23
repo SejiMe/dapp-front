@@ -1,6 +1,7 @@
-export interface DengueCase {
+export interface PredictedDengueCase {
   psgccode: string;
-  barangayName: string;
+  barangay_name: string;
+  month_name: string;
   iso_year: number;
   iso_week: number;
   lagged_week: number;

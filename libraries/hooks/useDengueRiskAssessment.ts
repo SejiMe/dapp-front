@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { DengueCase } from "@models/DengueCase";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import {
   RiskAssessmentResult,
   DengueRiskAssessment,

@@ -21,7 +21,7 @@ const HomePage = () => {
   // Add this debugging
   console.log("SWR State:", { historicalData, error, isLoading });
   console.log("Data structure:", historicalData);
-  console.log("TotalDengueCases:", historicalData?.totalDengueCases);
+  console.log("TotalDengueCases:", historicalData?.recorded_cases);
 
   if (error) return <p>Error loading dengue data</p>;
 

@@ -1,7 +1,8 @@
 import { YearlyHistoricalDengueCases } from "@/models/HistoricalDengueCase";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { DecimationAlgorithm } from "chart.js";
 
-export type Probability = {
+export type predicted_case_outbreak_probability = {
   month: string;
   iso_week: number;
   iso_year: number;
@@ -10,103 +11,115 @@ export type Probability = {
 
 export const SampleData: YearlyHistoricalDengueCases = {
   psgccode: "0931700001",
-  totalDengueCases: [
+  recorded_cases: [
     {
       year: "2014",
-      totalCases: 12,
+      total_cases: 12,
     },
     {
       year: "2015",
-      totalCases: 19,
+      total_cases: 19,
     },
     {
       year: "2016",
-      totalCases: 34,
+      total_cases: 34,
     },
     {
       year: "2017",
-      totalCases: 29,
+      total_cases: 29,
     },
     {
       year: "2018",
-      totalCases: 15,
+      total_cases: 15,
     },
     {
       year: "2019",
-      totalCases: 37,
+      total_cases: 37,
     },
     {
       year: "2020",
-      totalCases: 2,
+      total_cases: 2,
     },
     {
       year: "2021",
-      totalCases: 37,
+      total_cases: 37,
     },
     {
       year: "2022",
-      totalCases: 12,
+      total_cases: 12,
     },
     {
       year: "2023",
-      totalCases: 3,
+      total_cases: 3,
     },
   ],
 };
 
-export const ProbabilitySampleData: Probability[] = [
+export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
-    month: "January",
-    iso_week: 1,
-    iso_year: 2025,
-    probability: 80,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 16,
+    lagged_week: 14,
+    lagged_year: 16,
+    value_predicted: 1,
+    outbreak_probability: 33.567222595214844,
   },
   {
-    month: "January",
-    iso_week: 2,
-    iso_year: 2025,
-    probability: 50,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 17,
+    lagged_week: 15,
+    lagged_year: 17,
+    value_predicted: 1,
+    outbreak_probability: 35.17383575439453,
   },
   {
-    month: "January",
-    iso_week: 3,
-    iso_year: 2025,
-    probability: 20,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 18,
+    lagged_week: 16,
+    lagged_year: 18,
+    value_predicted: 1,
+    outbreak_probability: 35.5318603515625,
   },
   {
-    month: "January",
-    iso_week: 4,
-    iso_year: 2025,
-    probability: 20,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 19,
+    lagged_week: 17,
+    lagged_year: 19,
+    value_predicted: 1,
+    outbreak_probability: 34.999961853027344,
   },
   {
-    month: "February",
-    iso_week: 5,
-    iso_year: 2025,
-    probability: 70,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 20,
+    lagged_week: 18,
+    lagged_year: 20,
+    value_predicted: 1,
+    outbreak_probability: 34.85506820678711,
   },
   {
-    month: "February",
-    iso_week: 6,
-    iso_year: 2025,
-    probability: 60,
-  },
-  {
-    month: "February",
-    iso_week: 7,
-    iso_year: 2025,
-    probability: 30,
-  },
-  {
-    month: "February",
-    iso_week: 8,
-    iso_year: 2025,
-    probability: 70,
-  },
-  {
-    month: "March",
-    iso_week: 9,
-    iso_year: 2025,
-    probability: 65,
+    psgccode: "0931700001",
+    barangay_name: "Arena Blanco",
+    month_name: "",
+    iso_year: 2014,
+    iso_week: 21,
+    lagged_week: 19,
+    lagged_year: 21,
+    value_predicted: 1,
+    outbreak_probability: 35.03949737548828,
   },
 ];

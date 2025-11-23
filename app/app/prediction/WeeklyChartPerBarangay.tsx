@@ -1,11 +1,16 @@
 "use client";
 import ChartComponent from "@/components/app/ChartComponent";
 import React from "react";
-import { Probability, ProbabilitySampleData } from "@/data/DengueProbability";
-import { TransformToWeeklyBarChart } from "@/libraries/serializer/TransformWeeklyProbabilityBarChart";
+import {
+  predicted_case_outbreak_probability,
+  ProbabilitySampleData,
+} from "@/data/DengueProbability";
+import { TransformWeeklyOutbreakProbabilityBarChart } from "@/libraries/serializer/TransformWeeklyOutbreakProbabilityBarChart";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 
-const WeeklyChartPerBarangay = ({ data }: { data: Probability[] }) => {
-  const { labels, datasets, monthBoundaries } = TransformToWeeklyBarChart(data);
+const WeeklyChartPerBarangay = ({ data }: { data: PredictedDengueCase[] }) => {
+  const { labels, datasets, monthBoundaries } =
+    TransformWeeklyOutbreakProbabilityBarChart(data);
 
   // Get DaisyUI theme colors from CSS variables
   const getThemeColor = (variable: string) => {
@@ -29,8 +34,16 @@ const WeeklyChartPerBarangay = ({ data }: { data: Probability[] }) => {
       ctx.save();
 
       monthBoundaries.forEach((boundary: any, index: number) => {
-        const startPixel = xScale.getPixelForValue(boundary.start);
-        const endPixel = xScale.getPixelForValue(boundary.end);
+        // Find the label indices for the start and end weeks
+        const startLabelIndex = labels.findIndex(
+          (label) => label === `Week ${boundary.startWeek}`
+        );
+        const endLabelIndex = labels.findIndex(
+          (label) => label === `Week ${boundary.endWeek}`
+        );
+
+        const startPixel = xScale.getPixelForValue(startLabelIndex);
+        const endPixel = xScale.getPixelForValue(endLabelIndex);
         const centerX = (startPixel + endPixel) / 2;
 
         // Draw month label with theme color
@@ -46,8 +59,13 @@ const WeeklyChartPerBarangay = ({ data }: { data: Probability[] }) => {
 
         // Draw separator line (except for last month)
         if (index < monthBoundaries.length - 1) {
+          const nextBoundary = monthBoundaries[index + 1];
+          const nextStartLabelIndex = labels.findIndex(
+            (label) => label === `Week ${nextBoundary.startWeek}`
+          );
           const separatorX =
-            (endPixel + xScale.getPixelForValue(boundary.end + 1)) / 2;
+            (endPixel + xScale.getPixelForValue(nextStartLabelIndex)) / 2;
+
           ctx.strokeStyle = "rgba(209, 213, 219, 0.5)";
           ctx.lineWidth = 1;
           ctx.setLineDash([5, 5]);

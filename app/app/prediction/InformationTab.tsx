@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useCalendar } from "../CalendarContext";
 import { redirect } from "next/navigation";
 import { useBarangaySelection } from "./BarangaySelectionContext";
@@ -9,7 +9,7 @@ import {
 } from "@/libraries/risk-assessment";
 import RiskAssessmentCard from "@/components/app/RiskAssessmentCard";
 import useSWR from "swr";
-import { DengueCase } from "@/models/DengueCase";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { DengueCasesAPI } from "@/libraries/api/DengueAPI";
 import { ApiError } from "@/libraries/api/Client";
 import useSWRMutation from "swr/mutation";
@@ -27,23 +27,27 @@ const InformationTab = () => {
   const { trigger } = useSWRMutation("retry-on-error-fetch", () =>
     DengueCasesAPI.predictDengueCase(SelectedBarangay!.PsgcCode, getStringDate!)
   );
-  const { data, isLoading, error, mutate } = useSWR<DengueCase, ApiError>(
-    SelectedBarangay !== null ? "predicted-case" : null,
-    () =>
-      DengueCasesAPI.getWeeklyPrediction(
-        SelectedBarangay!.PsgcCode,
-        getStringDate!
-      )
+
+  const { data, isLoading, error, mutate } = useSWR<
+    PredictedDengueCase,
+    ApiError
+  >(SelectedBarangay !== null ? "predicted-case" : null, () =>
+    DengueCasesAPI.getOneWeekPrediction(
+      SelectedBarangay!.PsgcCode,
+      getStringDate!
+    )
   );
 
-  // Update riskResult when data changes or when there's an error
+  // Handle 404 error separately
   useEffect(() => {
-    if (error?.status == 404) {
+    if (error?.status === 404) {
       trigger();
       mutate();
     }
+  }, [error?.status]); // Only re-run when error status changes
 
-    // Update riskResult based on data or error
+  // Update riskResult when data changes
+  useEffect(() => {
     if (
       data &&
       data.outbreak_probability !== undefined &&
@@ -53,13 +57,12 @@ const InformationTab = () => {
     } else {
       setRiskResult(null);
     }
-  }, [data, error, trigger, mutate]);
+  }, [data]);
 
-  // Update riskResult when SelectedBarangay changes
+  // Reset when barangay changes
   useEffect(() => {
-    // Reset riskResult when barangay changes
-    // The data will be fetched by SWR and the first useEffect will update the riskResult
     setRiskResult(null);
+    mutate();
   }, [SelectedBarangay]);
 
   const dates = getWeekDateRangeString().split(" ");
@@ -81,8 +84,8 @@ const InformationTab = () => {
 
       {error?.status == 404 && (
         <p className="text-error w-full text-center">
-          {" "}
-          Data Not Found Try Selecting Other Dates
+          Data Not Found. Wait while we try generating prediction. If not try
+          other sometime.
         </p>
       )}
       {!isLoading && riskResult !== null ? (

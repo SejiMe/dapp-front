@@ -1,4 +1,4 @@
-import { DengueCase } from "@models/DengueCase";
+import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import {
   DengueRiskAssessment,
   RiskAssessmentResult,
@@ -21,10 +21,8 @@ export async function fetchAndAssessRisk(
     const { DengueCasesAPI } = await import("@/libraries/api/DengueAPI");
 
     // Fetch the prediction data - API returns Promise<DengueCase>
-    const dengueCase: DengueCase = await DengueCasesAPI.getWeeklyPrediction(
-      psgccode,
-      selectedDate
-    );
+    const dengueCase: PredictedDengueCase =
+      await DengueCasesAPI.getOneWeekPrediction(psgccode, selectedDate);
 
     // Assess the risk
     return DengueRiskAssessment.assessRisk(dengueCase, historicalAverage);

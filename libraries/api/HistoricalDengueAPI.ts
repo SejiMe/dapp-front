@@ -10,12 +10,12 @@ if (dengueAPIBasePath === undefined) {
 
 const api = new APIBuilder(dengueAPIBasePath);
 
-const baseApiGroup = "/api/dengue-cases/historical/";
+const baseApiGroup = "/api/dengue-cases/";
 
 export const HistoricalDengueCases = {
   getYearlyHistorical: (psgccode: string) => {
     const historicalData = api.get<YearlyHistoricalDengueCases>(
-      baseApiGroup + psgccode
+      baseApiGroup + "historical-year/" + psgccode
     );
 
     // TODO
