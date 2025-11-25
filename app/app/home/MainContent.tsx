@@ -29,7 +29,7 @@ const MainContent = (props: Props) => {
             warnings, risk level maps, and health tips empowering users and
             health officials to take preventive action before outbreaks occur.
           </p>
-          <Link href={"/app/dashboard"} className="btn btn-primary">
+          <Link href={"/app/prediction"} className="btn btn-primary">
             Predict Now
           </Link>
         </div>

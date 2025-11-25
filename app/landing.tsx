@@ -21,7 +21,7 @@ const Landing = () => {
         <div className="absolute flex flex-col p-2 text-neutral-content top-1/5 left-0 lg:left-1/8">
           <div className="max-w-md">
             <h1 className="mb-5 text-5xl font-bold">
-              Predict and prevent engue outbreaks
+              Predict and prevent Dengue outbreaks
             </h1>
             <p className="mb-5">
               D-APP is a web app that uses real-time data and time series
