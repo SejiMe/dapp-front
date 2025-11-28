@@ -8,7 +8,7 @@ export function TransformToYearlyCasesToChart(
   const colors = getChartColors();
   const labels = cases?.map((x) => x.year);
   const values = cases?.map((x) => x.total_cases);
-  console.log(colors);
+  // console.log(colors);
   return {
     labels,
     datasets: [
