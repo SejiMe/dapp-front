@@ -19,11 +19,17 @@ dayjs.extend(isoWeek);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
+export type CurrentIso = {
+  isoWeek: number;
+  isoYear: number;
+};
+
 interface CalendarContextType {
   selectedDate: Date | null;
   isoWeek: number | null;
   isoYear: number | null;
   getStringDate: string | undefined;
+  //  currentIso: CurrentIso;
   selectDate: (date: Date) => void;
   getWeekDateRange: () => Date[] | null;
   getWeekDateRangeString: () => string;
@@ -32,6 +38,8 @@ interface CalendarContextType {
   // New dayjs functions for ISO week handling
   isInISOWeekRange: (date: string | Date) => boolean;
   getISOWeekDates: () => string[];
+  isDateIsDisabled: (date: Date) => boolean;
+  addLatestWeatherPooledDate: (date: string | Date) => void;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(
@@ -40,16 +48,22 @@ const CalendarContext = createContext<CalendarContextType | undefined>(
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [latestDate, setLatestDate] = useState<Date | null>(null);
 
   const extractStringFormatDate = () => {
-    console.log(selectedDate?.toString());
     if (!selectedDate) return undefined;
     return format(selectedDate, "yyyy-MM-dd");
   };
 
   const selectDate = (date: Date) => {
-    console.log(date);
     setSelectedDate(date);
+  };
+
+  // add Latest date weather pooled from API
+  const addLatestWeatherPooledDate = (date: Date | string) => {
+    if (date != typeof Date) setLatestDate(new Date(date));
+
+    setLatestDate(date as Date);
   };
 
   // ✅ New: get all dates (Mon–Sun) in the ISO week of the selected date
@@ -113,6 +127,44 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
     return dates;
   };
 
+  const isDateIsDisabled = (date: Date): boolean => {
+    // console.log(`passed date: ${date}`);
+    const passedDate = dayjs(date);
+    const wpDate = dayjs(latestDate);
+
+    const wpIsoWeek = wpDate.isoWeek();
+    const wpIsoYear = wpDate.isoWeekYear();
+
+    const passedIsoWeek = passedDate.isoWeek();
+    const passedIsoYear = passedDate.isoWeekYear();
+
+    // Calculate the target week and year (wpDate + 2 weeks)
+    let targetWeek = wpIsoWeek + 2;
+    let targetYear = wpIsoYear;
+
+    // If week 52/53, adding 2 weeks rolls over to next year
+    if (wpIsoWeek === 52 || wpIsoWeek === 53) {
+      targetWeek = wpIsoWeek + 2 - 52; // Week 1 or 2 of next year
+      targetYear = wpIsoYear + 1;
+    }
+
+    // Return true (disabled) if passed date is greater than target date
+    if (passedIsoYear > targetYear) {
+      return true;
+    } else if (passedIsoYear === targetYear && passedIsoWeek > targetWeek) {
+      return true;
+    }
+
+    return false;
+  };
+
+  // Get the current week and date client side time
+  const getCurrentIsoDetails = (): CurrentIso => {
+    const djs = dayjs(new Date());
+
+    return { isoWeek: djs.isoWeek(), isoYear: djs.isoWeekYear() };
+  };
+
   const value = useMemo(() => {
     if (!selectedDate)
       return {
@@ -127,6 +179,8 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
         getFormattedDateForAPI: () => undefined,
         isInISOWeekRange: () => false,
         getISOWeekDates: () => [],
+        isDateIsDisabled,
+        addLatestWeatherPooledDate,
       };
 
     const isoWeek = getISOWeek(selectedDate);
@@ -147,6 +201,8 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
       getFormattedDateForAPI: () => extractStringFormatDate(),
       isInISOWeekRange,
       getISOWeekDates,
+      isDateIsDisabled,
+      addLatestWeatherPooledDate,
     };
   }, [selectedDate]);
 

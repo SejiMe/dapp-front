@@ -32,14 +32,19 @@ export const MantineCalendar = ({
   excludeDates = [],
   highlightDates = [],
 }: MantineCalendarProps) => {
-  const { selectDate, selectedDate, rangeDates, isInISOWeekRange } =
-    useCalendar();
+  const {
+    selectDate,
+    selectedDate,
+    rangeDates,
+    isInISOWeekRange,
+    isDateIsDisabled,
+  } = useCalendar();
   const colors = getDaisyUIColors();
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <div
-      className={`bg-white rounded-box shadow-lg p-4 w-full h-full lg:h-[60vh] flex flex-col ${className}`}
+      className={`bg-white rounded-box shadow-lg p-4 w-full h-full lg:h-[70vh] flex flex-col ${className}`}
     >
       <div className="w-full flex flex-col-reverse lg:flex-row lg:gap-4 place-items-center">
         <Calendar
@@ -50,6 +55,7 @@ export const MantineCalendar = ({
               fontSize: "1.4rem",
             },
           }}
+          onNextYear={() => null}
           firstDayOfWeek={1} // Monday
           weekendDays={[0, 6]} // Saturday and Sunday
           size="xl"
@@ -62,10 +68,11 @@ export const MantineCalendar = ({
                 : false;
             const isSelected = isInISOWeekRange(dateString);
             const isInRange = isHovered || isSelected;
-
+            const isDisabled = isDateIsDisabled(new Date(date));
             return {
               onMouseEnter: () => setHovered(dateString),
               onMouseLeave: () => setHovered(null),
+              disabled: isDisabled,
               inRange: isInRange,
               firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
               lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday

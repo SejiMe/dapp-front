@@ -155,7 +155,7 @@ const RiskAssessmentCard: React.FC<RiskAssessmentCardProps> = ({
                   Immediate Actions
                 </h4>
                 <ul className="list-disc list-inside space-y-1">
-                  {suggestions.slice(0, 3).map((suggestion, index) => (
+                  {suggestions.map((suggestion, index) => (
                     <li key={index} className="text-sm">
                       {suggestion}
                     </li>

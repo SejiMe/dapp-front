@@ -29,7 +29,7 @@ export class APIBuilder {
   }
 
   async get<T>(path = "", query?: QueryParams, options?: RequestInit) {
-    console.log(`GET: ${this.buildUrl(path, query)}`);
+    // console.log(`GET: ${this.buildUrl(path, query)}`);
     return apiClient.get<T>(this.buildUrl(path, query), {
       ...options,
       method: "GET",
@@ -37,7 +37,7 @@ export class APIBuilder {
   }
 
   async post<T>(path = "", body?: unknown, options?: RequestInit) {
-    console.log(`POST: ${this.buildUrl(path)}`);
+    // console.log(`POST: ${this.buildUrl(path)}`);
     const url = this.buildUrl(path);
     // Extract just the pathname part to avoid double base URL
     const urlObj = new URL(url);
@@ -49,7 +49,7 @@ export class APIBuilder {
   }
 
   async put<T>(path = "", body?: unknown, options?: RequestInit) {
-    console.log(`PUT: ${this.buildUrl(path)}`);
+    // console.log(`PUT: ${this.buildUrl(path)}`);
     const url = this.buildUrl(path);
     // Extract just the pathname part to avoid double base URL
     const urlObj = new URL(url);
@@ -61,7 +61,7 @@ export class APIBuilder {
   }
 
   async patch<T>(path = "", body?: unknown, options?: RequestInit) {
-    console.log(`PATCH: ${this.buildUrl(path)}`);
+    // console.log(`PATCH: ${this.buildUrl(path)}`);
     const url = this.buildUrl(path);
     // Extract just the pathname part to avoid double base URL
     const urlObj = new URL(url);
@@ -73,7 +73,7 @@ export class APIBuilder {
   }
 
   async delete<T>(path = "", options?: RequestInit) {
-    console.log(`DELETE: ${this.buildUrl(path)}`);
+    // console.log(`DELETE: ${this.buildUrl(path)}`);
     const url = this.buildUrl(path);
     // Extract just the pathname part to avoid double base URL
     const urlObj = new URL(url);

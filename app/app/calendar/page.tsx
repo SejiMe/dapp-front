@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { useCalendar } from "./../CalendarContext";
 import MantineCalendar from "@/libraries/ui/MantineCalendar";
 import AppLink from "@/components/app/AppLink";
+import { useEffect } from "react";
+import { WeatherPoolingData } from "@/libraries/api/WeatherPoolingAPI";
+import useSWR from "swr";
 
 export default function CalendarPage() {
   const {
@@ -12,13 +15,20 @@ export default function CalendarPage() {
     isoWeek,
     isoYear,
     getStringDate,
-    getWeekDateRangeString,
-    rangeDates,
+    addLatestWeatherPooledDate,
   } = useCalendar();
+
+  const { data } = useSWR("get-weather-pool-data", () =>
+    WeatherPoolingData.getLatestWeatherPooledDate()
+  );
 
   const handleRedirection = () => {
     redirect("");
   };
+
+  useEffect(() => {
+    if (data != undefined) addLatestWeatherPooledDate(new Date(data.date));
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-base-100 items-center space-y-4 p-6">
@@ -27,11 +37,7 @@ export default function CalendarPage() {
           className="w-full"
           allowSingleDateSelection={true}
           allowRangeSelection={true}
-          highlightDates={[
-            // Example highlighted dates - can be populated from API
-            new Date("2024-12-25"),
-            new Date("2024-01-01"),
-          ]}
+
           // excludeDates={[
           //   // Example excluded dates - can be populated from API
           //   new Date("2024-12-31"),
@@ -45,45 +51,6 @@ export default function CalendarPage() {
             Start Predicting
           </AppLink>
         </div>
-        {/* <div className="card bg-base-200 w-full p-4 shadow mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-base-content">
-                Selected Date
-              </h3>
-              <p className="text-base-content">
-                {selectedDate
-                  ? selectedDate.toLocaleDateString()
-                  : "No date selected"}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-base-content">
-                Week Range
-              </h3>
-              <p className="text-base-content">
-                {rangeDates || "No week selected"}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-base-content">
-                ISO Week
-              </h3>
-              <p className="text-base-content">
-                {isoWeek && isoYear ? `Week ${isoWeek}, ${isoYear}` : "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-base-content">
-                String Date
-              </h3>
-              <p className="text-base-content">{getStringDate || "N/A"}</p>
-            </div>
-          </div>
-        </div> */}
       </div>
     </div>
   );
