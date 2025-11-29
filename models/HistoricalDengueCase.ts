@@ -1,5 +1,5 @@
 export interface YearlyHistoricalDengueCases {
-  psgccode: string;
+  psgccode: string | null;
   recorded_cases: YearlyTotalDengueCases[];
 }
 

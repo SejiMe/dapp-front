@@ -6,10 +6,7 @@ import useSWR from "swr";
 import { Localities } from "@/libraries/api/AdministrativeAreaAPI";
 import ChartsTab from "./ChartsTab";
 import InformationTab from "./InformationTab";
-import {
-  BarangaySelectionProvider,
-  useBarangaySelection,
-} from "./BarangaySelectionContext";
+import { useBarangaySelection } from "./BarangaySelectionContext";
 
 type Props = {};
 
@@ -22,8 +19,7 @@ const DashboardPage = (props: Props) => {
     Localities.getAllBarangaysByPsgccode("0931700000")
   );
 
-  const { ClearSelection, SelectBarangay, SelectedBarangay } =
-    useBarangaySelection();
+  const { SelectBarangay } = useBarangaySelection();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;

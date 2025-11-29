@@ -15,7 +15,7 @@ const HomePage = () => {
     error,
     isLoading,
   } = useSWR("HistoricalDengue", () =>
-    HistoricalDengueCases.getYearlyHistorical("0931700001")
+    HistoricalDengueCases.getYearlyHistorical()
   );
 
   // Add this debugging
