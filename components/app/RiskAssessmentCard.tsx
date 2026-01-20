@@ -6,6 +6,25 @@ import {
   getRiskLevelText,
   getAlertMessage,
 } from "@/libraries/risk-assessment/DengueRiskAssessment";
+import {
+  Alert,
+  Badge,
+  Card,
+  Divider,
+  Grid,
+  Group,
+  List,
+  RingProgress,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import {
+  IconAlertTriangle,
+  IconShieldCheck,
+  IconAlertCircle,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 
 interface RiskAssessmentCardProps {
   riskResult: RiskAssessmentResult;
@@ -29,157 +48,182 @@ const RiskAssessmentCard: React.FC<RiskAssessmentCardProps> = ({
     urgencyLevel,
   } = riskResult;
 
-  // Get DaisyUI alert class based on risk level
-  const getAlertClass = () => {
+  // Get Mantine alert color based on risk level
+  const getAlertColor = () => {
     switch (riskLevel) {
       case RiskLevel.LOW:
-        return "alert-success";
+        return "green";
       case RiskLevel.MODERATE:
-        return "alert-warning";
+        return "yellow";
       case RiskLevel.HIGH:
       case RiskLevel.CRITICAL:
-        return "alert-error";
+        return "red";
       default:
-        return "alert-info";
+        return "blue";
     }
   };
 
-  // Get urgency badge class
-  const getUrgencyBadgeClass = () => {
+  // Get alert icon based on risk level
+  const getAlertIcon = () => {
+    switch (riskLevel) {
+      case RiskLevel.LOW:
+        return <IconShieldCheck size={24} />;
+      case RiskLevel.MODERATE:
+        return <IconAlertCircle size={24} />;
+      case RiskLevel.HIGH:
+      case RiskLevel.CRITICAL:
+        return <IconAlertTriangle size={24} />;
+      default:
+        return <IconInfoCircle size={24} />;
+    }
+  };
+
+  // Get urgency badge color
+  const getUrgencyBadgeColor = () => {
     switch (urgencyLevel) {
       case "low":
-        return "badge-success";
+        return "green";
       case "medium":
-        return "badge-warning";
+        return "yellow";
       case "high":
-        return "badge-error";
+        return "red";
       case "critical":
-        return "badge-error badge-lg";
+        return "red";
       default:
-        return "badge-info";
+        return "blue";
+    }
+  };
+
+  // Get ring progress color
+  const getRingColor = () => {
+    switch (riskLevel) {
+      case RiskLevel.LOW:
+        return "green";
+      case RiskLevel.MODERATE:
+        return "yellow";
+      case RiskLevel.HIGH:
+        return "orange";
+      case RiskLevel.CRITICAL:
+        return "red";
+      default:
+        return "blue";
     }
   };
 
   return (
-    <div className="w-full space-y-4">
+    <Stack gap="md" w="100%">
       {/* Risk Level Display */}
-      <div className={`alert ${getAlertClass()} shadow-lg`}>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-lg">
-                {getRiskLevelText(riskLevel)}
-              </h3>
-              <p className="text-sm">
-                {getAlertMessage(riskLevel, barangayName)}
-              </p>
-            </div>
-            <div className={`badge ${getUrgencyBadgeClass()} uppercase`}>
+      <Alert
+        variant="light"
+        color={getAlertColor()}
+        icon={getAlertIcon()}
+        title={
+          <Group justify="space-between" wrap="wrap">
+            <Text fw={700} size="lg">
+              {getRiskLevelText(riskLevel)}
+            </Text>
+            <Badge
+              color={getUrgencyBadgeColor()}
+              size={urgencyLevel === "critical" ? "lg" : "md"}
+              variant="filled"
+              tt="uppercase"
+            >
               {urgencyLevel} urgency
-            </div>
-          </div>
-        </div>
-      </div>
+            </Badge>
+          </Group>
+        }
+      >
+        <Text size="sm">{getAlertMessage(riskLevel, barangayName)}</Text>
+      </Alert>
 
       {/* Risk Visualization */}
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">Risk Assessment</h2>
+      <Card shadow="md" padding="lg" radius="md" withBorder>
+        <Title order={4} mb="md">
+          Risk Assessment
+        </Title>
 
-          {/* Progress Bar */}
-          <div className="flex flex-col items-center space-y-2">
-            <div
-              className={`radial-progress ${config.color.replace("text-", "")}`}
-              style={
-                {
-                  "--value":
-                    DengueRiskAssessment.getProgressValue(riskPercentage),
-                  "--size": "12rem",
-                  "--thickness": "1rem",
-                } as React.CSSProperties
-              }
-              role="progressbar"
-              aria-valuenow={riskPercentage}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <span className="text-2xl font-bold">
+        {/* Progress Ring */}
+        <Stack align="center" gap="sm">
+          <RingProgress
+            size={200}
+            thickness={16}
+            roundCaps
+            sections={[
+              {
+                value: DengueRiskAssessment.getProgressValue(riskPercentage),
+                color: getRingColor(),
+              },
+            ]}
+            label={
+              <Text ta="center" fw={700} size="xl">
                 {riskPercentage.toFixed(2)}%
-              </span>
-            </div>
-            <p className="text-sm opacity-70">
-              Probability of Dengue Transmission
-            </p>
-          </div>
+              </Text>
+            }
+          />
+          <Text size="sm" c="dimmed">
+            Probability of Dengue Transmission
+          </Text>
+        </Stack>
 
-          {showDetails && <div className="divider">Details</div>}
+        {showDetails && (
+          <>
+            <Divider my="md" label="Details" labelPosition="center" />
 
-          {showDetails && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="stat">
-                <div className="stat-title">Risk Level</div>
-                <div className={`stat-value ${config.color}`}>
-                  {getRiskLevelText(riskLevel)}
-                </div>
-                <div className="stat-desc">{config.description}</div>
-              </div>
+            <Grid>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="xs">
+                  <Text size="sm" c="dimmed">
+                    Risk Level
+                  </Text>
+                  <Text size="xl" fw={700} c={getRingColor()}>
+                    {getRiskLevelText(riskLevel)}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {config.description}
+                  </Text>
+                </Stack>
+              </Grid.Col>
 
-              <div className="stat">
-                <div className="stat-title">Risk Score</div>
-                <div className={`stat-value ${config.color}`}>
-                  {riskResult.riskScore.toFixed(2)}/100
-                </div>
-                <div className="stat-desc">Adjusted risk score</div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="xs">
+                  <Text size="sm" c="dimmed">
+                    Risk Score
+                  </Text>
+                  <Text size="xl" fw={700} c={getRingColor()}>
+                    {riskResult.riskScore.toFixed(2)}/100
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    Adjusted risk score
+                  </Text>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </>
+        )}
+      </Card>
 
       {/* Suggestions */}
       {showSuggestions && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Recommended Actions</h2>
+        <Card shadow="md" padding="lg" radius="md" withBorder>
+          <Title order={4} mb="md">
+            Recommended Actions
+          </Title>
 
-            {/* <div className="tabs tabs-boxed">
-              <a className="tab">All</a>
-              <a className="tab">Personal</a>
-              <a className="tab">Community</a>
-              <a className="tab">Environmental</a>
-            </div> */}
-
-            <div className="mt-4 space-y-4">
-              <div>
-                <h4 className="font-semibold text-base-content/80 mb-2">
-                  Immediate Actions
-                </h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {suggestions.map((suggestion, index) => (
-                    <li key={index} className="text-sm">
-                      {suggestion}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-base-content/80 mb-2">
-                  Preventive Measures
-                </h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {preventiveMeasures.slice(0, 3).map((measure, index) => (
-                    <li key={index} className="text-sm">
-                      {measure}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <Stack gap="md">
+            <div>
+              <Text fw={600} c="dimmed" mb="sm">
+                Immediate Actions
+              </Text>
+              <List size="sm" spacing="xs">
+                {suggestions.map((suggestion, index) => (
+                  <List.Item key={index}>{suggestion}</List.Item>
+                ))}
+              </List>
             </div>
-          </div>
-        </div>
+          </Stack>
+        </Card>
       )}
-    </div>
+    </Stack>
   );
 };
 

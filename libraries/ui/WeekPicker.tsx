@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { DatePicker } from "@mantine/dates";
-import { getDaisyUIColors } from "./theme-utils";
+import { Select, Stack, Text } from "@mantine/core";
 
 interface WeekPickerProps {
   value?: number;
@@ -21,8 +20,6 @@ export const WeekPicker = ({
   minYear = 2020,
   maxYear = new Date().getFullYear() + 1,
 }: WeekPickerProps) => {
-  const colors = getDaisyUIColors();
-
   const handleChange = (week: number, yearValue?: number) => {
     if (onChange) {
       onChange(week, yearValue || year);
@@ -31,47 +28,46 @@ export const WeekPicker = ({
 
   // Generate weeks for the current year
   const weeks = Array.from({ length: 53 }, (_, i) => i + 1);
-  const currentYear = new Date().getFullYear();
+
+  const weekOptions = weeks.map((week) => ({
+    value: String(week),
+    label: `Week ${week}`,
+  }));
+
+  const yearOptions = Array.from({ length: maxYear - minYear + 1 }, (_, i) => ({
+    value: String(minYear + i),
+    label: String(minYear + i),
+  }));
 
   return (
-    <div className={`form-control ${className}`}>
-      <label className="label">
-        <span className="label-text">Week</span>
-      </label>
-      <select
-        className={`select select-bordered ${colors.primary} text-base-content`}
-        value={value}
-        onChange={(e) => {
-          const week = Number(e.target.value);
-          const year = Number(e.target.options[e.target.selectedIndex].text);
-          handleChange(week, year);
+    <Stack gap="sm" className={className}>
+      <Select
+        label="Week"
+        data={weekOptions}
+        value={value ? String(value) : null}
+        onChange={(val) => {
+          if (val) {
+            handleChange(Number(val), year);
+          }
         }}
-      >
-        {weeks.map((week) => (
-          <option key={week} value={week}>
-            Week {week}
-          </option>
-        ))}
-      </select>
+        searchable
+        nothingFoundMessage="No week found"
+      />
 
-      <label className="label">
-        <span className="label-text">Year</span>
-      </label>
-      <select
-        className={`select select-bordered ${colors.primary} text-base-content`}
-        value={year}
-        onChange={(e) => {
-          const selectedWeek = value || 1;
-          handleChange(selectedWeek, Number(e.target.value));
+      <Select
+        label="Year"
+        data={yearOptions}
+        value={String(year)}
+        onChange={(val) => {
+          if (val) {
+            const selectedWeek = value || 1;
+            handleChange(selectedWeek, Number(val));
+          }
         }}
-      >
-        {Array.from({ length: maxYear - minYear + 1 }, (_, i) => (
-          <option key={i} value={minYear + i}>
-            {minYear + i}
-          </option>
-        ))}
-      </select>
-    </div>
+        searchable
+        nothingFoundMessage="No year found"
+      />
+    </Stack>
   );
 };
 

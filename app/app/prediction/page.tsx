@@ -1,92 +1,93 @@
 "use client";
-import React, { useCallback, useState } from "react";
-import WeeklyPerBarangay from "./WeeklyPerBarangay";
-import { ProbabilitySampleData } from "@/data/DengueProbability";
-import useSWR from "swr";
-import { Localities } from "@/libraries/api/AdministrativeAreaAPI";
+import React, { useEffect, useMemo } from "react";
+import { Select, Stack, Text, Paper, Tabs } from "@mantine/core";
+import { IconChartBar, IconInfoCircle } from "@tabler/icons-react";
 import ChartsTab from "./ChartsTab";
 import InformationTab from "./InformationTab";
-import { useBarangaySelection } from "./BarangaySelectionContext";
+import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
+import { useBarangaysStore } from "@/libraries/stores/useBarangaysStore";
 
 type Props = {};
 
 const DashboardPage = (props: Props) => {
-  const {
-    data: brgyFetchData,
-    error: brgyFetchError,
-    isLoading: brgyFetchIsLoading,
-  } = useSWR("admin-areas", () =>
-    Localities.getAllBarangaysByPsgccode("0931700000")
+  const municipalityPsgcCode = "0931700000";
+
+  const { SelectedBarangay, SelectBarangay, ClearSelection } =
+    useBarangaySelectionStore();
+  const { getBarangays, fetchBarangays, isLoading, error } =
+    useBarangaysStore();
+
+  useEffect(() => {
+    fetchBarangays(municipalityPsgcCode);
+  }, [fetchBarangays, municipalityPsgcCode]);
+
+  const barangays = getBarangays(municipalityPsgcCode);
+
+  const selectData = useMemo(
+    () =>
+      barangays.map((b) => ({
+        value: b.psgcCode,
+        label: b.name,
+      })),
+    [barangays],
   );
 
-  const { SelectBarangay } = useBarangaySelection();
-
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = event.target.value;
-
-    if (selectedValue == "") return;
-
-    const [psgccode, name] = selectedValue.split("::");
-    SelectBarangay(name, psgccode);
-  };
-
   return (
-    <div className="p-2 rounded-xl bg-white ">
-      {/* name of each tab group should be unique */}
-
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-col">
-          <label htmlFor="select_barangay" className="label">
-            <span className="label-text">Barangay</span>
-          </label>
-          <select
-            id="select_barangay"
-            className="select select-primary w-52"
-            defaultValue=""
-            onChange={handleChange}
-          >
-            <option value="" disabled>
-              Select Barangay
-            </option>
-            {brgyFetchIsLoading == false &&
-              brgyFetchData?.map((e) => {
-                return (
-                  <option key={e.psgcCode} value={`${e.psgcCode}::${e.name}`}>
-                    {e.name}
-                  </option>
-                );
-              })}
-          </select>
-        </div>
-
-        {/* For Debugging only */}
-        {/* <button className="hidden btn btn-primary text-warning-content place-self-center">
-          Generate Data
-        </button> */}
-      </div>
-
-      <div className="tabs tabs-border flex">
-        <input
-          type="radio"
-          name="my_tabs_1"
-          className="tab"
-          aria-label="Information"
-          defaultChecked
+    <Paper p="md" radius="md" shadow="sm">
+      <Stack gap="md">
+        <Select
+          label="Barangay"
+          placeholder={isLoading ? "Loading barangays..." : "Select barangay"}
+          data={selectData}
+          value={SelectedBarangay?.PsgcCode ?? null}
+          searchable
+          clearable
+          onClear={ClearSelection}
+          onChange={(value) => {
+            if (!value) {
+              ClearSelection();
+              return;
+            }
+            const selected = barangays.find((b) => b.psgcCode === value);
+            SelectBarangay(selected?.name ?? value, value);
+          }}
+          disabled={isLoading}
+          nothingFoundMessage="No barangays found"
+          w={320}
         />
-        <div className="tab-content border-base-300 bg-base-100 p-10">
-          <InformationTab />
-        </div>
-        <input
-          type="radio"
-          name="my_tabs_1"
-          className="tab"
-          aria-label="Charts"
-        />
-        <div className="tab-content border-base-300 bg-base-100 p-10">
-          <ChartsTab />
-        </div>
-      </div>
-    </div>
+        {error && (
+          <Text c="red.6" size="sm">
+            Failed to load barangays
+          </Text>
+        )}
+
+        <Tabs defaultValue="information" variant="outline">
+          <Tabs.List>
+            <Tabs.Tab
+              value="information"
+              leftSection={<IconInfoCircle size={16} />}
+            >
+              Information
+            </Tabs.Tab>
+            <Tabs.Tab value="charts" leftSection={<IconChartBar size={16} />}>
+              Charts
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="information" pt="md">
+            <Paper p="lg" withBorder>
+              <InformationTab />
+            </Paper>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="charts" pt="md">
+            <Paper p="lg" withBorder>
+              <ChartsTab />
+            </Paper>
+          </Tabs.Panel>
+        </Tabs>
+      </Stack>
+    </Paper>
   );
 };
 

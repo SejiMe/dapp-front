@@ -5,6 +5,7 @@ import { YearlyHistoricalDengueCases } from "@/models/HistoricalDengueCase";
 import { TransformToYearlyCasesToChart } from "@/libraries/serializer/TransformYearlyHistoricalBarChart";
 import ChartComponent from "@/components/app/ChartComponent";
 import { getChartColors } from "@/libraries/ui/chart-theme";
+import { Container, Loader, Paper, Center } from "@mantine/core";
 
 interface YearlyDengueChartProps {
   data?: YearlyHistoricalDengueCases;
@@ -46,7 +47,11 @@ export default function HistoricalYearlyCaseComponent({
 
   // Then check if mounted (only matters if we have data)
   if (!isMounted) {
-    return <p>Initializing Chart...</p>;
+    return (
+      <Center py="xl">
+        <Loader />
+      </Center>
+    );
   }
 
   const chartData = TransformToYearlyCasesToChart(data);
@@ -74,21 +79,21 @@ export default function HistoricalYearlyCaseComponent({
   };
 
   return (
-    <div className="w-full h-screen px-24">
+    <Container size="xl" py="md">
       <Swiper spaceBetween={20} slidesPerView={1}>
         {chunks.map((chunk, index) => (
           <SwiperSlide key={index}>
-            <div className="border rounded-2xl p-4 bg-white shadow-sm ">
+            <Paper p="md" radius="md" withBorder shadow="sm">
               <ChartComponent
                 type="bar"
                 data={chunk}
                 options={options}
                 height={300}
               />
-            </div>
+            </Paper>
           </SwiperSlide>
         ))}
       </Swiper>
-    </div>
+    </Container>
   );
 }

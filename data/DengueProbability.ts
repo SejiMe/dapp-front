@@ -59,7 +59,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Feb",
     iso_year: 2014,
     iso_week: 16,
     lagged_week: 14,
@@ -70,7 +70,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Feb",
     iso_year: 2014,
     iso_week: 17,
     lagged_week: 15,
@@ -81,7 +81,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Feb",
     iso_year: 2014,
     iso_week: 18,
     lagged_week: 16,
@@ -92,7 +92,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Mar",
     iso_year: 2014,
     iso_week: 19,
     lagged_week: 17,
@@ -103,7 +103,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Mar",
     iso_year: 2014,
     iso_week: 20,
     lagged_week: 18,
@@ -114,7 +114,7 @@ export const ProbabilitySampleData: PredictedDengueCase[] = [
   {
     psgccode: "0931700001",
     barangay_name: "Arena Blanco",
-    month_name: "",
+    month_name: "Mar",
     iso_year: 2014,
     iso_week: 21,
     lagged_week: 19,

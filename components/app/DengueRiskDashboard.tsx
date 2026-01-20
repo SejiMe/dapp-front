@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useCalendar } from "@/app/app/CalendarContext";
-import { useBarangaySelection } from "@/app/app/prediction/BarangaySelectionContext";
+import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
 import { format, subWeeks, addWeeks } from "date-fns";
 import {
   useDengueRiskAssessment,
@@ -9,6 +9,23 @@ import {
 } from "@/libraries/hooks/useDengueRiskAssessment";
 import { RiskLevel } from "@/libraries/risk-assessment/DengueRiskAssessment";
 import RiskAssessmentCard from "./RiskAssessmentCard";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Divider,
+  Grid,
+  Group,
+  Loader,
+  Progress,
+  Slider,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from "@mantine/core";
+import { IconAlertCircle, IconRefresh } from "@tabler/icons-react";
 
 interface DengueRiskDashboardProps {
   showTrendAnalysis?: boolean;
@@ -21,8 +38,8 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
   showBatchComparison = false,
   showAnalytics = false,
 }) => {
-  const { getWeekDateRangeString } = useCalendar();
-  const { SelectedBarangay } = useBarangaySelection();
+  const { getWeekDateRangeString } = useCalendarStore();
+  const { SelectedBarangay } = useBarangaySelectionStore();
 
   // Individual risk assessment
   const {
@@ -90,18 +107,30 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
   };
 
   // Get risk level color for badges
-  const getRiskBadgeClass = (riskLevel: RiskLevel) => {
+  const getRiskBadgeColor = (riskLevel: RiskLevel) => {
     switch (riskLevel) {
       case RiskLevel.LOW:
-        return "badge-success";
+        return "green";
       case RiskLevel.MODERATE:
-        return "badge-warning";
+        return "yellow";
       case RiskLevel.HIGH:
-        return "badge-error";
+        return "red";
       case RiskLevel.CRITICAL:
-        return "badge-error badge-lg";
+        return "red";
       default:
-        return "badge-ghost";
+        return "gray";
+    }
+  };
+
+  // Get progress color
+  const getProgressColor = (level: string) => {
+    switch (level) {
+      case RiskLevel.LOW:
+        return "green";
+      case RiskLevel.MODERATE:
+        return "yellow";
+      default:
+        return "red";
     }
   };
 
@@ -127,48 +156,38 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
   };
 
   return (
-    <div className="w-full space-y-6">
+    <Stack gap="lg" w="100%">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Dengue Risk Assessment Dashboard</h2>
-        <div className="flex gap-2">
-          <button
-            className="btn btn-outline btn-sm"
+      <Group justify="space-between" align="center">
+        <Title order={2}>Dengue Risk Assessment Dashboard</Title>
+        <Group gap="sm">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => refetch()}
             disabled={isLoading}
+            leftSection={
+              isLoading ? <Loader size="xs" /> : <IconRefresh size={16} />
+            }
           >
-            {isLoading ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : null}
             Refresh
-          </button>
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={handleDemoAssessment}
-          >
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDemoAssessment}>
             {showDemo ? "Hide Demo" : "Show Demo"}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
+      </Group>
 
       {/* Error Display */}
       {(error || batchError) && (
-        <div className="alert alert-error">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>{error || batchError}</span>
-        </div>
+        <Alert
+          variant="light"
+          color="red"
+          icon={<IconAlertCircle size={16} />}
+          title="Error"
+        >
+          {error || batchError}
+        </Alert>
       )}
 
       {/* Main Risk Assessment */}
@@ -183,42 +202,42 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
 
       {/* Loading State */}
       {isLoading && !riskResult && (
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
+        <Group justify="center" align="center" h={256}>
+          <Loader size="lg" />
+        </Group>
       )}
 
       {/* Demo Section */}
       {showDemo && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h3 className="card-title">Risk Assessment Demo</h3>
+        <Card shadow="md" padding="lg" radius="md" withBorder>
+          <Title order={4} mb="md">
+            Risk Assessment Demo
+          </Title>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Prediction Value (0-100)</span>
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="100"
+          <Stack gap="md">
+            <div>
+              <Text size="sm" mb="xs">
+                Prediction Value (0-100)
+              </Text>
+              <Slider
+                min={0}
+                max={100}
                 value={demoValue}
-                onChange={(e) => setDemoValue(Number(e.target.value))}
-                className="range"
+                onChange={setDemoValue}
+                marks={[
+                  { value: 0, label: "0" },
+                  { value: 25, label: "25" },
+                  { value: 50, label: "50" },
+                  { value: 75, label: "75" },
+                  { value: 100, label: "100" },
+                ]}
               />
-              <div className="flex justify-between text-xs px-2">
-                <span>0</span>
-                <span>25</span>
-                <span>50</span>
-                <span>75</span>
-                <span>100</span>
-              </div>
-              <div className="text-center mt-2">
-                <span className="text-lg font-bold">{demoValue}%</span>
-              </div>
+              <Text ta="center" mt="md" size="lg" fw={700}>
+                {demoValue}%
+              </Text>
             </div>
 
-            <div className="divider"></div>
+            <Divider />
 
             <RiskAssessmentCard
               riskResult={quickAssess(demoValue)}
@@ -226,190 +245,195 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
               showDetails={true}
               showSuggestions={false}
             />
-          </div>
-        </div>
+          </Stack>
+        </Card>
       )}
 
       {/* Trend Analysis */}
       {showTrendAnalysis && riskTrend && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h3 className="card-title">Risk Trend Analysis</h3>
+        <Card shadow="md" padding="lg" radius="md" withBorder>
+          <Title order={4} mb="md">
+            Risk Trend Analysis
+          </Title>
 
-            {isTrendLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <span className="loading loading-spinner loading-md"></span>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="table table-compact w-full">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Risk Level</th>
-                      <th>Trend</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {riskTrend.slice(-8).map((item, index) => (
-                      <tr key={index}>
-                        <td>{format(new Date(item.date), "MMM dd, yyyy")}</td>
-                        <td>
-                          <span
-                            className={`badge ${getRiskBadgeClass(
-                              item.riskLevel as RiskLevel
-                            )}`}
-                          >
-                            {item.riskLevel}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              item.trend === "improving"
-                                ? "badge-success"
-                                : item.trend === "worsening"
-                                ? "badge-error"
-                                : "badge-ghost"
-                            }`}
-                          >
-                            {item.trend}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
+          {isTrendLoading ? (
+            <Group justify="center" align="center" h={128}>
+              <Loader size="md" />
+            </Group>
+          ) : (
+            <Table striped highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Date</Table.Th>
+                  <Table.Th>Risk Level</Table.Th>
+                  <Table.Th>Trend</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {riskTrend.slice(-8).map((item, index) => (
+                  <Table.Tr key={index}>
+                    <Table.Td>
+                      {format(new Date(item.date), "MMM dd, yyyy")}
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        color={getRiskBadgeColor(item.riskLevel as RiskLevel)}
+                      >
+                        {item.riskLevel}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        color={
+                          item.trend === "improving"
+                            ? "green"
+                            : item.trend === "worsening"
+                              ? "red"
+                              : "gray"
+                        }
+                      >
+                        {item.trend}
+                      </Badge>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          )}
+        </Card>
       )}
 
       {/* Batch Comparison */}
       {showBatchComparison && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <div className="flex justify-between items-center">
-              <h3 className="card-title">Barangay Comparison</h3>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={handleBatchAssessment}
-                disabled={isBatchLoading}
-              >
-                {isBatchLoading ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : null}
-                Assess Multiple
-              </button>
-            </div>
+        <Card shadow="md" padding="lg" radius="md" withBorder>
+          <Group justify="space-between" align="center" mb="md">
+            <Title order={4}>Barangay Comparison</Title>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBatchAssessment}
+              disabled={isBatchLoading}
+              leftSection={isBatchLoading ? <Loader size="xs" /> : null}
+            >
+              Assess Multiple
+            </Button>
+          </Group>
 
-            {batchResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {batchResults.map((item, index) => (
-                  <div key={index} className="stat">
-                    <div className="stat-title">Barangay {item.psgccode}</div>
-                    <div
-                      className={`stat-value text-2xl ${
+          {batchResults.length > 0 ? (
+            <Grid>
+              {batchResults.map((item, index) => (
+                <Grid.Col key={index} span={{ base: 12, md: 4 }}>
+                  <Stack gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Barangay {item.psgccode}
+                    </Text>
+                    <Text
+                      size="xl"
+                      fw={700}
+                      c={
                         item.result
-                          ? getRiskBadgeClass(item.result.riskLevel).replace(
-                              "badge-",
-                              "text-"
-                            )
-                          : ""
-                      }`}
+                          ? getRiskBadgeColor(item.result.riskLevel)
+                          : "gray"
+                      }
                     >
                       {item.result ? `${item.result.riskPercentage}%` : "N/A"}
-                    </div>
-                    <div className="stat-desc">
+                    </Text>
+                    <Text size="xs" c="dimmed">
                       {item.result ? item.result.riskLevel : "No data"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                Click "Assess Multiple" to compare risk levels across barangays
-              </div>
-            )}
-          </div>
-        </div>
+                    </Text>
+                  </Stack>
+                </Grid.Col>
+              ))}
+            </Grid>
+          ) : (
+            <Text ta="center" c="dimmed" py="xl">
+              Click "Assess Multiple" to compare risk levels across barangays
+            </Text>
+          )}
+        </Card>
       )}
 
       {/* Analytics */}
       {showAnalytics && analytics && (
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h3 className="card-title">Risk Analytics</h3>
+        <Card shadow="md" padding="lg" radius="md" withBorder>
+          <Title order={4} mb="md">
+            Risk Analytics
+          </Title>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="stat">
-                <div className="stat-title">Total Assessments</div>
-                <div className="stat-value">{analytics.totalAssessments}</div>
-              </div>
+          <Grid mb="md">
+            <Grid.Col span={{ base: 6, md: 3 }}>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">
+                  Total Assessments
+                </Text>
+                <Text size="xl" fw={700}>
+                  {analytics.totalAssessments}
+                </Text>
+              </Stack>
+            </Grid.Col>
 
-              <div className="stat">
-                <div className="stat-title">Average Risk Score</div>
-                <div className="stat-value">
+            <Grid.Col span={{ base: 6, md: 3 }}>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">
+                  Average Risk Score
+                </Text>
+                <Text size="xl" fw={700}>
                   {analytics.averageRiskScore.toFixed(1)}
-                </div>
-              </div>
+                </Text>
+              </Stack>
+            </Grid.Col>
 
-              <div className="stat">
-                <div className="stat-title">High Risk Areas</div>
-                <div className="stat-value">
+            <Grid.Col span={{ base: 6, md: 3 }}>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">
+                  High Risk Areas
+                </Text>
+                <Text size="xl" fw={700}>
                   {analytics.highRiskAreas.length}
-                </div>
-              </div>
+                </Text>
+              </Stack>
+            </Grid.Col>
 
-              <div className="stat">
-                <div className="stat-title">Critical Risk</div>
-                <div className="stat-value text-error">
+            <Grid.Col span={{ base: 6, md: 3 }}>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">
+                  Critical Risk
+                </Text>
+                <Text size="xl" fw={700} c="red">
                   {analytics.riskLevelDistribution[RiskLevel.CRITICAL] || 0}
-                </div>
-              </div>
-            </div>
+                </Text>
+              </Stack>
+            </Grid.Col>
+          </Grid>
 
-            <div className="divider"></div>
+          <Divider my="md" />
 
-            <div>
-              <h4 className="font-semibold mb-2">Risk Level Distribution</h4>
-              <div className="space-y-2">
-                {Object.entries(analytics.riskLevelDistribution).map(
-                  ([level, count]) => (
-                    <div
-                      key={level}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="capitalize">{level}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 bg-base-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${
-                              level === RiskLevel.LOW
-                                ? "bg-success"
-                                : level === RiskLevel.MODERATE
-                                ? "bg-warning"
-                                : "bg-error"
-                            }`}
-                            style={{
-                              width: `${
-                                (count / analytics.totalAssessments) * 100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <span className="text-sm">{count}</span>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
+          <div>
+            <Text fw={600} mb="sm">
+              Risk Level Distribution
+            </Text>
+            <Stack gap="sm">
+              {Object.entries(analytics.riskLevelDistribution).map(
+                ([level, count]) => (
+                  <Group key={level} justify="space-between" align="center">
+                    <Text tt="capitalize">{level}</Text>
+                    <Group gap="sm" align="center">
+                      <Progress
+                        value={(count / analytics.totalAssessments) * 100}
+                        color={getProgressColor(level)}
+                        size="sm"
+                        w={128}
+                      />
+                      <Text size="sm">{count}</Text>
+                    </Group>
+                  </Group>
+                ),
+              )}
+            </Stack>
           </div>
-        </div>
+        </Card>
       )}
-    </div>
+    </Stack>
   );
 };
 

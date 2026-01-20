@@ -1,9 +1,9 @@
 "use client";
 
 import { Calendar } from "@mantine/dates";
-import { DatePicker } from "@mantine/dates";
-import { useCalendar } from "@/app/app/CalendarContext";
-import { getDaisyUIColors } from "./theme-utils";
+import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { Alert, Paper, Stack, Text, Group } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -32,66 +32,74 @@ export const MantineCalendar = ({
   excludeDates = [],
   highlightDates = [],
 }: MantineCalendarProps) => {
-  const {
-    selectDate,
-    selectedDate,
-    rangeDates,
-    isInISOWeekRange,
-    isDateIsDisabled,
-  } = useCalendar();
-  const colors = getDaisyUIColors();
+  const { selectDate, isInISOWeekRange, isDateIsDisabled } = useCalendarStore();
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div
-      className={`bg-white rounded-box shadow-lg p-4 w-full h-full lg:h-[70vh] flex flex-col ${className}`}
+    <Paper
+      shadow="md"
+      radius="md"
+      p="md"
+      className={className}
+      style={{ width: "100%", height: "100%" }}
     >
-      <div className="w-full flex flex-col-reverse lg:flex-row lg:gap-4 place-items-center">
-        <Calendar
-          styles={{
-            weekday: {
-              color: "ActiveBorder",
-              fontWeight: "bold",
-              fontSize: "1.4rem",
-            },
-          }}
-          onNextYear={() => null}
-          firstDayOfWeek={1} // Monday
-          weekendDays={[0, 6]} // Saturday and Sunday
-          size="xl"
-          withCellSpacing={false}
-          getDayProps={(date) => {
-            const dateString = dayjs(date).format("YYYY-MM-DD");
-            const isHovered =
-              isInISOWeekRange(dateString) && hovered
-                ? isInISOWeekRange(hovered)
-                : false;
-            const isSelected = isInISOWeekRange(dateString);
-            const isInRange = isHovered || isSelected;
-            const isDisabled = isDateIsDisabled(new Date(date));
-            return {
-              onMouseEnter: () => setHovered(dateString),
-              onMouseLeave: () => setHovered(null),
-              disabled: isDisabled,
-              inRange: isInRange,
-              firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
-              lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday
-              selected: isSelected,
-              onClick: () => selectDate(new Date(date)),
-            };
-          }}
-        />
-        <div className="alert alert-info mt-3 text-sm justify-center">
-          <span className="material-symbols-outlined">psychiatry</span>
-          <p>
-            <strong>Disclaimer:</strong> The selected date will be converted to
-            its corresponding ISO week for prediction purposes. Forecasts are
-            based on weekly data and include a two-week lag in weather
-            information.
-          </p>
-        </div>
-      </div>
-    </div>
+      <Stack gap="md" h="100%">
+        <Group
+          justify="center"
+          align="flex-start"
+          wrap="wrap"
+          gap="lg"
+        >
+          <Calendar
+            styles={{
+              weekday: {
+                color: "var(--mantine-color-teal-6)",
+                fontWeight: 700,
+                fontSize: "1.1rem",
+              },
+            }}
+            onNextYear={() => null}
+            firstDayOfWeek={1} // Monday
+            weekendDays={[0, 6]} // Saturday and Sunday
+            size="xl"
+            withCellSpacing={false}
+            getDayProps={(date) => {
+              const dateString = dayjs(date).format("YYYY-MM-DD");
+              const isHovered =
+                isInISOWeekRange(dateString) && hovered
+                  ? isInISOWeekRange(hovered)
+                  : false;
+              const isSelected = isInISOWeekRange(dateString);
+              const isInRange = isHovered || isSelected;
+              const isDisabled = isDateIsDisabled(new Date(date));
+              return {
+                onMouseEnter: () => setHovered(dateString),
+                onMouseLeave: () => setHovered(null),
+                disabled: isDisabled,
+                inRange: isInRange,
+                firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
+                lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday
+                selected: isSelected,
+                onClick: () => selectDate(new Date(date)),
+              };
+            }}
+          />
+          <Alert
+            variant="light"
+            color="teal"
+            title="Disclaimer"
+            icon={<IconInfoCircle />}
+            style={{ maxWidth: 400 }}
+          >
+            <Text size="sm">
+              The selected date will be converted to its corresponding ISO week
+              for prediction purposes. Forecasts are based on weekly data and
+              include a two-week lag in weather information.
+            </Text>
+          </Alert>
+        </Group>
+      </Stack>
+    </Paper>
   );
 };
 

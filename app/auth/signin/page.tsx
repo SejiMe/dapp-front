@@ -2,59 +2,63 @@
 
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import {
+  Anchor,
+  Button,
+  Group,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 
 type Props = {};
 
 const LoginPage = (props: Props) => {
+  const router = useRouter();
+
   const HandleTemp = () => {
-    redirect("/app/");
+    router.push("/app/");
   };
 
   return (
     <form action="submit">
-      <fieldset className="fieldset">
-        <label htmlFor="email" className="label">
-          Email
-        </label>
-        <input
+      <Stack gap="sm">
+        <TextInput
           type="email"
           id="email"
           name="email"
-          className="input"
+          label="Email"
           placeholder="Email"
+          required
         />
 
-        <label htmlFor="password" className="label">
-          Password
-        </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
-          className="input"
+          label="Password"
           placeholder="Password"
+          required
         />
 
-        <div>
-          <Link href="#" className="link link-hover">
+        <Group justify="space-between" wrap="wrap">
+          <Anchor component={Link} href="#" underline="hover" size="sm">
             Forgot password?
-          </Link>
-        </div>
-        <div>
-          No Account? Sign up{" "}
-          <Link href="/auth/signup" className="link link-accent">
-            here
-          </Link>
-        </div>
-        <button
-          type="button"
-          onClick={HandleTemp}
-          className="btn btn-neutral mt-4"
-        >
+          </Anchor>
+
+          <Text size="sm" c="dimmed">
+            No account?{" "}
+            <Anchor component={Link} href="/auth/signup" underline="hover">
+              Sign up
+            </Anchor>
+          </Text>
+        </Group>
+
+        <Button type="button" onClick={HandleTemp} mt="xs">
           Login
-        </button>
-      </fieldset>
+        </Button>
+      </Stack>
     </form>
   );
 };

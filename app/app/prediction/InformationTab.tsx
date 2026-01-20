@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useCalendar } from "../CalendarContext";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
 import { redirect } from "next/navigation";
-import { useBarangaySelection } from "./BarangaySelectionContext";
+import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
 import { format } from "date-fns";
 import {
   quickRiskAssessment,
@@ -13,29 +15,33 @@ import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { DengueCasesAPI } from "@/libraries/api/DengueAPI";
 import { ApiError } from "@/libraries/api/Client";
 import useSWRMutation from "swr/mutation";
+import { Loader, Stack, Text, Title, Center } from "@mantine/core";
 
 const InformationTab = () => {
   const { getWeekDateRange, getStringDate, getWeekDateRangeString } =
-    useCalendar();
-  const { SelectedBarangay } = useBarangaySelection();
+    useCalendarStore();
+  const { SelectedBarangay } = useBarangaySelectionStore();
   const [riskResult, setRiskResult] = useState<RiskAssessmentResult | null>(
-    null
+    null,
   );
 
   if (getWeekDateRange() == null) redirect("/app/calendar");
 
   const { trigger } = useSWRMutation("retry-on-error-fetch", () =>
-    DengueCasesAPI.predictDengueCase(SelectedBarangay!.PsgcCode, getStringDate!)
+    DengueCasesAPI.predictDengueCase(
+      SelectedBarangay!.PsgcCode,
+      getStringDate!,
+    ),
   );
-
+  console.log(getStringDate);
   const { data, isLoading, error, mutate } = useSWR<
     PredictedDengueCase,
     ApiError
   >(SelectedBarangay !== null ? "predicted-case" : null, () =>
     DengueCasesAPI.getOneWeekPrediction(
       SelectedBarangay!.PsgcCode,
-      getStringDate!
-    )
+      getStringDate!,
+    ),
   );
 
   // Handle 404 error separately
@@ -68,26 +74,23 @@ const InformationTab = () => {
   const dates = getWeekDateRangeString().split(" ");
 
   return (
-    <>
-      <h2 className="place-self-center text-accent-content text-2xl font-black mb-2">
+    <Stack gap="md" align="center">
+      <Title order={3} ta="center">
         {SelectedBarangay?.Name ?? "Please Select a Barangay"}
-      </h2>
+      </Title>
 
-      <div className="mb-4">
-        <div className="text-center">
-          <div className="stat-desc font-medium">
-            {format(dates[0], "MMM. dd, yyyy")} -{" "}
-            {format(dates[6], "MMM. dd, yyyy")}{" "}
-          </div>
-        </div>
-      </div>
+      <Text size="sm" c="dimmed" ta="center">
+        {format(dates[0], "MMM. dd, yyyy")} -{" "}
+        {format(dates[6], "MMM. dd, yyyy")}
+      </Text>
 
       {error?.status == 404 && (
-        <p className="text-error w-full text-center">
+        <Text c="red" ta="center">
           Data Not Found. Wait while we try generating prediction. If not try
           other sometime.
-        </p>
+        </Text>
       )}
+
       {!isLoading && riskResult !== null ? (
         <RiskAssessmentCard
           riskResult={riskResult}
@@ -96,9 +99,11 @@ const InformationTab = () => {
           showSuggestions={true}
         />
       ) : (
-        <span className="place-self-center w-full h-10 loading loading-ring loading-xl"></span>
+        <Center py="xl">
+          <Loader size="lg" />
+        </Center>
       )}
-    </>
+    </Stack>
   );
 };
 

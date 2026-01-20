@@ -1,46 +1,71 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import {
+  Box,
+  Button,
+  Container,
+  Overlay,
+  Text,
+  Title,
+  Stack,
+} from "@mantine/core";
 
 const Landing = () => {
   const router = useRouter();
-  function HandleGetStarted() {
-    // router.push('/auth/signin');
+
+  function handleGetStarted() {
     router.push("/app");
   }
 
   return (
-    <section id="landing" className="relative min-h-screen overflow-hidden">
-      <div
-        className="absolute bg-no-repeat bg-fixed inset-0 hero min-h-screen "
+    <Box
+      id="landing"
+      component="section"
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        backgroundImage: "url('/images/mosquitoOnLeaf.webp')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      <Overlay color="#000" backgroundOpacity={0.6} zIndex={1} />
+
+      <Container
+        size="md"
         style={{
-          backgroundImage: "url('/images/mosquitoOnLeaf.webp')",
+          position: "relative",
+          zIndex: 2,
+          paddingTop: "15vh",
+          paddingBottom: "4rem",
         }}
       >
-        <div className="hero-overlay"></div>
-        <div className="absolute flex flex-col p-2 text-neutral-content top-1/5 left-0 lg:left-1/8">
-          <div className="max-w-md">
-            <h1 className="mb-5 text-5xl font-bold">
-              Predict and prevent Dengue outbreaks
-            </h1>
-            <p className="mb-5">
-              D-APP is a web app that uses real-time data and time series
-              analysis to predict future dengue outbreaks. By analyzing weather
-              patterns, historical case data, and geographic trends, the app
-              provides early warnings, risk level maps, and health tips
-              empowering users and health officials to take preventive action
-              before outbreaks occur.
-            </p>
-            <button
-              onClick={HandleGetStarted}
-              className="w-full md:w-auto btn btn-accent"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
+        <Stack gap="lg" maw={500}>
+          <Title order={1} c="white" fw={700} size="3rem">
+            Predict and prevent Dengue outbreaks
+          </Title>
+
+          <Text c="white" size="lg" lh={1.6}>
+            D-APP is a web app that uses real-time data and time series analysis
+            to predict future dengue outbreaks. By analyzing weather patterns,
+            historical case data, and geographic trends, the app provides early
+            warnings, risk level maps, and health tips empowering users and
+            health officials to take preventive action before outbreaks occur.
+          </Text>
+
+          <Button
+            size="lg"
+            color="teal"
+            onClick={handleGetStarted}
+            w={{ base: "100%", sm: "auto" }}
+          >
+            Get Started
+          </Button>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
 

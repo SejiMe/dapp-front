@@ -1,4 +1,5 @@
 import React from "react";
+import { Box, Card, Grid, Title, Text, Stack, Paper } from "@mantine/core";
 
 export default function SigningLayout({
   children,
@@ -6,22 +7,50 @@ export default function SigningLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-base-200 text-base-content flex justify-center items-center min-h-screen min-w-screen">
-      <div className="h-full flex place-content-center ">
+    <Box
+      style={{
+        minHeight: "100vh",
+        minWidth: "100vw",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "var(--mantine-color-gray-1)",
+      }}
+    >
+      <Grid gutter={0} style={{ maxWidth: 1200, width: "100%" }}>
         {/* Left Side Panel */}
-        <div className="bg-base-300 text-center p-2 w-2/5 lg:text-left hidden md:block">
-          <h1 className="text-5xl font-bold">Account Registration</h1>
-          <p className="py-6">
-            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-            excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
-            a id nisi.
-          </p>
-        </div>
+        <Grid.Col span={{ base: 0, md: 5 }} visibleFrom="md">
+          <Paper
+            p="xl"
+            radius={0}
+            style={{
+              backgroundColor: "var(--mantine-color-gray-2)",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Stack gap="md">
+              <Title order={1} size="h2">
+                Account Registration
+              </Title>
+              <Text c="dimmed">
+                Provident cupiditate voluptatem et in. Quaerat fugiat ut
+                assumenda excepturi exercitationem quasi. In deleniti eaque aut
+                repudiandae et a id nisi.
+              </Text>
+            </Stack>
+          </Paper>
+        </Grid.Col>
+
         {/* Right Side Panel */}
-        <div className="card grow bg-base-100 p-2 w-3/5 max-w-3xl  shrink-0 shadow-2xl">
-          <div className="card-body">{children}</div>
-        </div>
-      </div>
-    </div>
+        <Grid.Col span={{ base: 12, md: 7 }}>
+          <Card shadow="xl" p="xl" radius="md" style={{ height: "100%" }}>
+            {children}
+          </Card>
+        </Grid.Col>
+      </Grid>
+    </Box>
   );
 }
