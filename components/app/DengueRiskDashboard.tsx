@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { useCalendarContext } from "@/libraries/contexts/CalendarContext";
 import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
 import { format, subWeeks, addWeeks } from "date-fns";
 import {
@@ -38,7 +38,7 @@ const DengueRiskDashboard: React.FC<DengueRiskDashboardProps> = ({
   showBatchComparison = false,
   showAnalytics = false,
 }) => {
-  const { getWeekDateRangeString } = useCalendarStore();
+  const { getWeekDateRangeString } = useCalendarContext();
   const { SelectedBarangay } = useBarangaySelectionStore();
 
   // Individual risk assessment

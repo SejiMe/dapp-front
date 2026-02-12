@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar } from "@mantine/dates";
-import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { useCalendarContext } from "@/libraries/contexts/CalendarContext";
 import { Alert, Paper, Stack, Text, Group } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import dayjs from "dayjs";
@@ -32,8 +32,16 @@ export const MantineCalendar = ({
   excludeDates = [],
   highlightDates = [],
 }: MantineCalendarProps) => {
-  const { selectDate, isInISOWeekRange, isDateIsDisabled } = useCalendarStore();
+  // Subscribe to the actual state value that changes
+  const selectedDateISO = useCalendarContext().selectedDateISO;
+
+  // Get the methods
+  const { selectDate, isInISOWeekRange, isDateIsDisabled } =
+    useCalendarContext();
+
   const [hovered, setHovered] = useState<string | null>(null);
+
+  console.log("Calendar re-rendered, selectedDateISO:", selectedDateISO); // Debug log
 
   return (
     <Paper
@@ -44,12 +52,7 @@ export const MantineCalendar = ({
       style={{ width: "100%", height: "100%" }}
     >
       <Stack gap="md" h="100%">
-        <Group
-          justify="center"
-          align="flex-start"
-          wrap="wrap"
-          gap="lg"
-        >
+        <Group justify="center" align="flex-start" wrap="wrap" gap="lg">
           <Calendar
             styles={{
               weekday: {
@@ -80,7 +83,10 @@ export const MantineCalendar = ({
                 firstInRange: isInRange && dayjs(date).isoWeekday() === 1, // Monday
                 lastInRange: isInRange && dayjs(date).isoWeekday() === 7, // Sunday
                 selected: isSelected,
-                onClick: () => selectDate(new Date(date)),
+                onClick: () => {
+                  console.log("Clicking date:", date); // Debug log
+                  selectDate(new Date(date));
+                },
               };
             }}
           />

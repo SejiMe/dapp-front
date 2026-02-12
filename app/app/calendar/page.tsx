@@ -1,6 +1,6 @@
 "use client";
 
-import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { useCalendarContext } from "@/libraries/contexts/CalendarContext";
 import MantineCalendar from "@/libraries/ui/MantineCalendar";
 import { WeatherPoolingData } from "@/libraries/api/WeatherPoolingAPI";
 import useSWR from "swr";
@@ -8,9 +8,7 @@ import { Stack, Button, Container } from "@mantine/core";
 import Link from "next/link";
 
 export default function CalendarPage() {
-  const addLatestWeatherPooledDate = useCalendarStore(
-    (state) => state.addLatestWeatherPooledDate,
-  );
+  const { addLatestWeatherPooledDate } = useCalendarContext();
 
   useSWR(
     "get-weather-pool-data",

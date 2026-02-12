@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { CalendarProvider } from "@/libraries/contexts/CalendarContext";
 import {
   AppShell,
   Burger,
@@ -121,7 +122,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <AppShell.Main>
         <Box mih="100%" bg={isDark ? "dark.9" : "gray.0"}>
-          {children}
+          <CalendarProvider>{children}</CalendarProvider>
         </Box>
       </AppShell.Main>
     </AppShell>

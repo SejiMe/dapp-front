@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useCalendarStore } from "@/libraries/stores/useCalendarStore";
+import { useCalendarContext } from "@/libraries/contexts/CalendarContext";
 import { redirect } from "next/navigation";
 import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
 import { format } from "date-fns";
@@ -18,30 +18,53 @@ import useSWRMutation from "swr/mutation";
 import { Loader, Stack, Text, Title, Center } from "@mantine/core";
 
 const InformationTab = () => {
-  const { getWeekDateRange, getStringDate, getWeekDateRangeString } =
-    useCalendarStore();
+  // Wait for hydration
+  const {
+    _hasHydrated: hasHydrated,
+    selectedDateISO,
+    getWeekDateRange,
+    getWeekDateRangeString,
+    getStringDate: stringDate,
+  } = useCalendarContext();
+
   const { SelectedBarangay } = useBarangaySelectionStore();
   const [riskResult, setRiskResult] = useState<RiskAssessmentResult | null>(
     null,
   );
 
+  console.log("🔍 InformationTab State:", {
+    hasHydrated,
+    selectedDateISO,
+    stringDate,
+  });
+
+  // Show loader while hydrating
+  if (!hasHydrated) {
+    return (
+      <Center h="100vh">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
   if (getWeekDateRange() == null) redirect("/app/calendar");
 
   const { trigger } = useSWRMutation("retry-on-error-fetch", () =>
-    DengueCasesAPI.predictDengueCase(
-      SelectedBarangay!.PsgcCode,
-      getStringDate!,
-    ),
+    DengueCasesAPI.predictDengueCase(SelectedBarangay!.PsgcCode, stringDate),
   );
-  console.log(getStringDate);
+
   const { data, isLoading, error, mutate } = useSWR<
     PredictedDengueCase,
     ApiError
-  >(SelectedBarangay !== null ? "predicted-case" : null, () =>
-    DengueCasesAPI.getOneWeekPrediction(
-      SelectedBarangay!.PsgcCode,
-      getStringDate!,
-    ),
+  >(
+    SelectedBarangay !== null && stringDate
+      ? `predicted-case-${SelectedBarangay.PsgcCode}-${stringDate}`
+      : null,
+    () =>
+      DengueCasesAPI.getOneWeekPrediction(
+        SelectedBarangay!.PsgcCode,
+        stringDate,
+      ),
   );
 
   // Handle 404 error separately
@@ -50,7 +73,7 @@ const InformationTab = () => {
       trigger();
       mutate();
     }
-  }, [error?.status]); // Only re-run when error status changes
+  }, [error?.status, trigger, mutate]);
 
   // Update riskResult when data changes
   useEffect(() => {
@@ -65,11 +88,10 @@ const InformationTab = () => {
     }
   }, [data]);
 
-  // Reset when barangay changes
+  // Reset when barangay or date changes
   useEffect(() => {
     setRiskResult(null);
-    mutate();
-  }, [SelectedBarangay]);
+  }, [SelectedBarangay, stringDate]);
 
   const dates = getWeekDateRangeString().split(" ");
 
