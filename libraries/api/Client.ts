@@ -30,6 +30,19 @@ class ApiClient {
       signal: AbortSignal.timeout(this.config.timeout),
     };
 
+    // Attach Authorization header if access token is available in localStorage
+    try {
+      const stored = localStorage.getItem("dengue_user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Use backend access token (validated JWT) or Supabase access token
+        const token = parsed?.accessToken || parsed?.access_token || parsed?.supabaseSession?.accessToken;
+        if (token) {
+          (defaultOptions.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+        }
+      }
+    } catch {}
+
     let lastError: ApiError | null = null;
     let attempt = 0;
 

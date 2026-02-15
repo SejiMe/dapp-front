@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, Grid, Title, Text, Stack, Paper } from "@mantine/core";
+import { Box, Card, Grid, Title, Text, Stack, Paper, GridCol } from "@mantine/core";
 
 export default function SigningLayout({
   children,
@@ -19,7 +19,7 @@ export default function SigningLayout({
     >
       <Grid gutter={0} style={{ maxWidth: 1200, width: "100%" }}>
         {/* Left Side Panel */}
-        <Grid.Col span={{ base: 0, md: 5 }} visibleFrom="md">
+        <GridCol span={{ base: 0, md: 5 }} visibleFrom="md">
           <Paper
             p="xl"
             radius={0}
@@ -42,14 +42,14 @@ export default function SigningLayout({
               </Text>
             </Stack>
           </Paper>
-        </Grid.Col>
+        </GridCol>
 
         {/* Right Side Panel */}
-        <Grid.Col span={{ base: 12, md: 7 }}>
+        <GridCol span={{ base: 12, md: 7 }}>
           <Card shadow="xl" p="xl" radius="md" style={{ height: "100%" }}>
             {children}
           </Card>
-        </Grid.Col>
+        </GridCol>
       </Grid>
     </Box>
   );
