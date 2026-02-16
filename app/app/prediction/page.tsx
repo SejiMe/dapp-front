@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo } from "react";
 import { Select, Stack, Text, Paper, Tabs } from "@mantine/core";
 import { IconChartBar, IconInfoCircle } from "@tabler/icons-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ChartsTab from "./ChartsTab";
 import InformationTab from "./InformationTab";
 import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
@@ -10,7 +11,11 @@ import { useBarangaysStore } from "@/libraries/stores/useBarangaysStore";
 type Props = {};
 
 const DashboardPage = (props: Props) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const municipalityPsgcCode = "0931700000";
+
+  const activeTab = useSearchParams().get("tab") || "information";
 
   const { SelectedBarangay, SelectBarangay, ClearSelection } =
     useBarangaySelectionStore();
@@ -31,6 +36,13 @@ const DashboardPage = (props: Props) => {
       })),
     [barangays],
   );
+
+   const handleTabChange = (value: string | null) => {
+    if (value) {
+      // Update URL with new tab
+      router.push(`${pathname}?tab=${value}`);
+    }
+  };
 
   return (
     <Paper p="md" radius="md" shadow="sm">
@@ -61,7 +73,7 @@ const DashboardPage = (props: Props) => {
           </Text>
         )}
 
-        <Tabs defaultValue="information" variant="outline">
+        <Tabs value={activeTab} onChange={handleTabChange} variant="outline">
           <Tabs.List>
             <Tabs.Tab
               value="information"

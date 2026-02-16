@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { APIBuilder } from "./Builder";
 import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { Last5YearsPredictedResponse } from "@/models/Last5YearsPredictedResponse";
+import { YearlyAverageResponse, MonthlyAverageResponse, MonthlyAverageOutbreakProbabilityResponse } from "@/models/Statistics";
 
 const dengueAPIBasePath = process.env.NEXT_PUBLIC_DENGUE_API;
 
@@ -84,6 +85,36 @@ export const DengueCasesAPI = {
       {
         Year: year,
       },
+    );
+  },
+
+  /**
+   * Get yearly average predicted dengue cases by PSGC code and ISO year.
+   * GET /api/dengue-cases/{psgccode}/yearly-average/{year}
+   */
+  getYearlyAverage: (psgccode: string, year: number) => {
+    return api.get<YearlyAverageResponse>(
+      baseApiGroup + psgccode + "/yearly-average/" + year
+    );
+  },
+
+  /**
+   * Get monthly average predicted dengue cases by PSGC code and ISO year.
+   * GET /api/dengue-cases/{psgccode}/monthly-average/{year}
+   */
+  getMonthlyAverage: (psgccode: string, year: number) => {
+    return api.get<MonthlyAverageResponse>(
+      baseApiGroup + psgccode + "/monthly-average/" + year
+    );
+  },
+
+  /**
+   * Get monthly average outbreak probability by PSGC code and ISO year.
+   * GET /api/dengue-cases/{psgccode}/monthly-average-outbreak-probability/{year}
+   */
+  getMonthlyAverageOutbreakProbability: (psgccode: string, year: number) => {
+    return api.get<MonthlyAverageOutbreakProbabilityResponse>(
+      baseApiGroup + psgccode + "/monthly-average-outbreak-probability/" + year
     );
   },
 };

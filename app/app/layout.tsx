@@ -51,7 +51,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       try {
         // Use the utility function from Auth.ts to get stored user
         const userData = getStoredUser();
-        console.info("Stored user data:", userData);
         
         if (!userData) {
           setUser(null);

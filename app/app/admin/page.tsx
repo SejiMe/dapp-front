@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Tabs, Card, Button, Text, Group, TextInput, Stack, useMantineTheme } from "@mantine/core";
+import { Tabs, Card, Button, Text, Group, TextInput, Stack, useMantineTheme, Select, Alert, Divider } from "@mantine/core";
 import TrainingAPI from "@/libraries/api/TrainingAPI";
 import AdminDengueAPI from "@/libraries/api/AdminDengueAPI";
 import WeatherSummaryAPI from "@/libraries/api/WeatherSummaryAPI";
+import { Localities } from "@/libraries/api/AdministrativeAreaAPI";
+import { WeatherPoolingData } from "@/libraries/api/WeatherPoolingAPI";
 import { showNotification } from "@mantine/notifications";
 import AuthAPI, { getStoredUser, decodeJwt, storeUser } from "@/libraries/api/Auth";
 import { useRouter } from "next/dist/client/components/navigation";
+import { MantineCalendar } from "@/libraries/ui/MantineCalendar";
+import { AdvisoryManagement } from "./AdvisoryManagement";
 
 
 export default function AdminPage() {
@@ -18,7 +22,32 @@ export default function AdminPage() {
   const [modelInfo, setModelInfo] = useState<any>(null);
   const [psgc, setPsgc] = useState("");
   const [date, setDate] = useState("");
-  const [logs, setLogs] = useState<string[]>([]);
+  const [barangays, setBarangays] = useState<Array<{ value: string; label: string }>>([]);
+  const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const municipalityPsgcCode = "0931700000";
+
+    (async () => {
+      try {
+        const list: any[] = await Localities.getAllBarangaysByPsgccode(municipalityPsgcCode);
+        if (!mounted) return;
+        setBarangays(
+          list.map((b) => ({
+            value: b.psgcCode,
+            label: b.name,
+          })),
+        );
+      } catch (e) {
+        console.error("Failed to load barangays", e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     TrainingAPI.getAdvanceModelInfo()
@@ -45,7 +74,9 @@ export default function AdminPage() {
     }, [router]);
 
 
-  const appendLog = (text: string) => setLogs((s) => [text, ...s]);
+  const appendLog = (text: string) => {
+
+};
 
   // Ensure access token is refreshed using backend refresh endpoint (backend sets refresh token cookie)
   const ensureFreshAccess = async () => {
@@ -63,18 +94,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleTrainBasic = async () => {
-    appendLog("Starting basic training...");
-    await ensureFreshAccess();
-    try {
-      await TrainingAPI.trainBasicModel();
-      appendLog("Basic training started");
-      showNotification({ title: "Training", message: "Basic training started" });
-    } catch (e) {
-      appendLog("Basic training failed");
-      showNotification({ title: "Error", message: "Basic training failed" });
-    }
-  };
+
 
   const handleTrainAdvance = async () => {
     appendLog("Starting advanced training...");
@@ -104,14 +124,27 @@ export default function AdminPage() {
   };
 
   const handleCreateBulk = async () => {
-    appendLog("Creating CSV for bulk prediction...");
+    console.log("Creating CSV for bulk prediction...");
     await ensureFreshAccess();
     try {
-      await AdminDengueAPI.createBulkCsvForPrediction({});
-      appendLog("Create-bulk triggered");
-      showNotification({ title: "Bulk", message: "Create bulk triggered" });
+      const response = await AdminDengueAPI.createBulkCsvForPrediction({}) as any;
+      console.log("Create-bulk triggered");
+      showNotification({ 
+        title: "Bulk CSV Created", 
+        message: "Bulk CSV file has been created successfully and is ready for download." 
+      });
+      
+      // Create a downloadable link if the response contains a file URL
+      if (response && response.fileUrl) {
+        const link = document.createElement('a');
+        link.href = response.fileUrl;
+        link.download = 'bulk_prediction.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (e) {
-      appendLog("Create-bulk failed");
+      console.log("Create-bulk failed");
       showNotification({ title: "Error", message: "Create bulk failed" });
     }
   };
@@ -129,26 +162,32 @@ export default function AdminPage() {
     }
   };
 
-  const handleTestDateExtraction = async () => {
-    appendLog("Running date extraction test...");
-    try {
-      const r = await AdminDengueAPI.testDateExtraction();
-      appendLog("Test result: " + JSON.stringify(r));
-      showNotification({ title: "Test", message: "Date extraction completed" });
-    } catch (e) {
-      appendLog("Test failed");
-      showNotification({ title: "Error", message: "Test failed" });
-    }
-  };
+
 
   const fetchWeather = async () => {
     try {
       const current = await WeatherSummaryAPI.getCurrentWeek();
-      appendLog("Weather current-week: " + JSON.stringify(current));
+      console.log("Weather current-week: " + JSON.stringify(current));
       const lagged = await WeatherSummaryAPI.getLagged2Week();
-      appendLog("Weather lagged-2week: " + JSON.stringify(lagged));
+      console.log("Weather lagged-2week: " + JSON.stringify(lagged));
     } catch (e) {
-      appendLog("Weather fetch failed");
+      console.log("Weather fetch failed");
+    }
+  };
+
+  const handleManualWeatherPooling = async () => {
+    try {
+      await WeatherPoolingData.manualTriggerWeatherPooling();
+      showNotification({ 
+        title: "Weather Pooling", 
+        message: "Weather pooling job has been manually triggered successfully." 
+      });
+    } catch (e) {
+      console.log("Weather pooling manual trigger failed");
+      showNotification({ 
+        title: "Error", 
+        message: "Failed to trigger weather pooling job." 
+      });
     }
   };
 
@@ -163,15 +202,21 @@ export default function AdminPage() {
           <Tabs.Tab value="model">Model</Tabs.Tab>
           <Tabs.Tab value="predictions">Predictions</Tabs.Tab>
           <Tabs.Tab value="weather">Weather</Tabs.Tab>
-          <Tabs.Tab value="utilities">Utilities</Tabs.Tab>
+          <Tabs.Tab value="advisories">Advisories</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="model" style={{ paddingTop: theme.spacing.xs }}>
           <Stack gap="sm">
             <Text fw={600}>Model Info</Text>
+            <Alert variant="light" color="blue" title="Disclaimer">
+              <Text size="sm">
+                Use the Train Advanced button to retrain the prediction model with the latest data. 
+                This process may take several minutes to complete. Ensure you have sufficient data 
+                before initiating training.
+              </Text>
+            </Alert>
             <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(modelInfo, null, 2)}</pre>
             <Group>
-              <Button onClick={handleTrainBasic}>Train Basic</Button>
               <Button onClick={handleTrainAdvance}>Train Advanced</Button>
             </Group>
           </Stack>
@@ -180,7 +225,25 @@ export default function AdminPage() {
         <Tabs.Panel value="predictions" style={{ paddingTop: theme.spacing.xs }}>
           <Stack gap="sm">
             <Text fw={600}>Manual Predictions</Text>
-            <TextInput label="PSGC Code" value={psgc} onChange={(e) => setPsgc(e.target.value)} />
+            <Alert variant="light" color="blue" title="Disclaimer">
+              <Text size="sm">
+                Select a barangay from the dropdown and enter a date in yyyy-MM-dd format to run predictions. 
+                The Run Prediction button generates dengue case predictions for the selected location and date. 
+                Create Bulk CSV generates a template file for batch predictions. Yearly Lagged processes 
+                historical data for improved model accuracy.
+              </Text>
+            </Alert>
+            <Select
+              label="Select Barangay"
+              placeholder="Choose a barangay"
+              data={barangays}
+              value={selectedBarangay}
+              onChange={(value) => {
+                setSelectedBarangay(value);
+                setPsgc(value || "");
+              }}
+              searchable
+            />
             <TextInput label="Date (yyyy-MM-dd)" value={date} onChange={(e) => setDate(e.target.value)} />
             <Group>
               <Button onClick={handlePredict}>Run Prediction</Button>
@@ -193,28 +256,29 @@ export default function AdminPage() {
         <Tabs.Panel value="weather" style={{ paddingTop: theme.spacing.xs }}>
           <Stack gap="sm">
             <Text fw={600}>Weather Summaries</Text>
-            <Button onClick={fetchWeather}>Fetch Weather Summaries</Button>
+            <Alert variant="light" color="blue" title="Disclaimer">
+              <Text size="sm">
+                Use the Fetch Weather Summaries button to manually retrieve the latest weather data. 
+                This data is essential for accurate dengue predictions as weather conditions significantly 
+                impact mosquito breeding and disease transmission patterns. The Manual Weather Pooling 
+                button triggers the job that fetches weather data from external APIs.
+              </Text>
+            </Alert>
+            <Group>
+              <Button onClick={fetchWeather}>Fetch Weather Summaries</Button>
+              <Button onClick={handleManualWeatherPooling}>Manual Weather Pooling</Button>
+            </Group>
           </Stack>
         </Tabs.Panel>
 
-        <Tabs.Panel value="utilities" style={{ paddingTop: theme.spacing.xs }}>
-          <Stack gap="sm">
-            <Text fw={600}>Utilities</Text>
-            <Button onClick={handleTestDateExtraction}>Test Date Extraction</Button>
-          </Stack>
+        <Tabs.Panel value="advisories" style={{ paddingTop: theme.spacing.xs }}>
+          <AdvisoryManagement />
         </Tabs.Panel>
+
+
       </Tabs>
 
-      <Text fw={600} style={{ marginTop: theme.spacing.md }}>
-        Logs
-      </Text>
-      <div style={{ maxHeight: 240, overflow: "auto" }}>
-        {logs.map((l, i) => (
-          <pre key={i} style={{ margin: 0 }}>
-            {l}
-          </pre>
-        ))}
-      </div>
+
     </Card>
   );
 }

@@ -11,9 +11,7 @@ const api = new APIBuilder(base);
 const baseApiGroup = "/api/training-data/";
 
 export const TrainingAPI = {
-  getBasicModelInfo: () => api.get(baseApiGroup + "model-info/basic"),
-  getAdvanceModelInfo: () => api.get(baseApiGroup + "model-info/advance"),
-  trainBasicModel: (payload?: any) => api.post(baseApiGroup + "basic", payload),
+  getAdvanceModelInfo: () => api.get(baseApiGroup + "model-info"),
   trainAdvanceModel: (payload?: any) => api.post(baseApiGroup + "advanced", payload),
 };
 

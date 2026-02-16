@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useCalendarContext } from "@/libraries/contexts/CalendarContext";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
 import { format } from "date-fns";
 import {
@@ -10,27 +10,36 @@ import {
   RiskAssessmentResult,
 } from "@/libraries/risk-assessment";
 import RiskAssessmentCard from "@/components/app/RiskAssessmentCard";
+import YearlyAverageCard from "@/components/app/YearlyAverageCard";
 import useSWR from "swr";
 import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { DengueCasesAPI } from "@/libraries/api/DengueAPI";
+import AdvisoriesAPI, { RiskLevel } from "@/libraries/api/AdvisoriesAPI";
+import { YearlyAverageResponse } from "@/models/Statistics";
 import { ApiError } from "@/libraries/api/Client";
 import useSWRMutation from "swr/mutation";
-import { Loader, Stack, Text, Title, Center } from "@mantine/core";
+import { Loader, Stack, Text, Title, Center, Paper, Group, Badge, Alert, Card } from "@mantine/core";
 
 const InformationTab = () => {
-  // Wait for hydration
+  // Check hydration first before any hooks
   const {
     _hasHydrated: hasHydrated,
     selectedDateISO,
     getWeekDateRange,
     getWeekDateRangeString,
     getStringDate: stringDate,
+    isoYear,
   } = useCalendarContext();
+
+  const router = useRouter();
 
   const { SelectedBarangay } = useBarangaySelectionStore();
   const [riskResult, setRiskResult] = useState<RiskAssessmentResult | null>(
     null,
   );
+
+  // Get current year from selected date
+  const currentYear = isoYear;
 
   console.log("🔍 InformationTab State:", {
     hasHydrated,
@@ -38,14 +47,6 @@ const InformationTab = () => {
     stringDate,
   });
 
-  // Show loader while hydrating
-  if (!hasHydrated) {
-    return (
-      <Center h="100vh">
-        <Loader size="lg" />
-      </Center>
-    );
-  }
 
   if (getWeekDateRange() == null) redirect("/app/calendar");
 
@@ -65,6 +66,43 @@ const InformationTab = () => {
         SelectedBarangay!.PsgcCode,
         stringDate,
       ),
+  );
+
+  // Fetch yearly average data
+  const { data: yearlyAverageData, isLoading: isYearlyLoading } = useSWR<
+    YearlyAverageResponse,
+    ApiError
+  >(
+    SelectedBarangay !== null && currentYear
+      ? `yearly-average-${SelectedBarangay.PsgcCode}-${currentYear}`
+      : null,
+    () =>
+      DengueCasesAPI.getYearlyAverage(
+        SelectedBarangay!.PsgcCode,
+        currentYear!
+      ),
+  );
+
+  // Function to convert RiskLevel from DengueRiskAssessment to AdvisoriesAPI format
+  const convertRiskLevel = (riskLevel: any): RiskLevel => {
+    switch (riskLevel) {
+      case "low":
+        return "Low";
+      case "moderate":
+        return "Medium";
+      case "high":
+        return "High";
+      case "critical":
+        return "Critical";
+      default:
+        return "Low";
+    }
+  };
+
+  // Fetch all advisories (preventive measurements)
+  const { data: advisoriesData, isLoading: isAdvisoriesLoading } = useSWR(
+    `advisories-all`,
+    () => AdvisoriesAPI.getAllAdvisories(),
   );
 
   // Handle 404 error separately
@@ -92,6 +130,15 @@ const InformationTab = () => {
   useEffect(() => {
     setRiskResult(null);
   }, [SelectedBarangay, stringDate]);
+  
+  // Show loader while hydrating
+  if (!hasHydrated) {
+    return (
+      <Center h="100vh">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
 
   const dates = getWeekDateRangeString().split(" ");
 
@@ -113,13 +160,39 @@ const InformationTab = () => {
         </Text>
       )}
 
+      {/* Yearly Average Card */}
+      <YearlyAverageCard
+        yearlyAverageData={yearlyAverageData}
+        isLoading={isYearlyLoading}
+      />
+
       {!isLoading && riskResult !== null ? (
-        <RiskAssessmentCard
-          riskResult={riskResult}
-          barangayName={SelectedBarangay?.Name}
-          showDetails={true}
-          showSuggestions={true}
-        />
+        <>
+          <RiskAssessmentCard
+            riskResult={riskResult}
+            barangayName={SelectedBarangay?.Name}
+            showDetails={true}
+            showSuggestions={false}
+          />
+          
+          {/* Preventive Measurements Section */}
+          {!isAdvisoriesLoading && advisoriesData && advisoriesData.length > 0 ? (
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <Text fw={600} size="lg" mb="md">
+                Preventive Measurements
+              </Text>
+              <Stack gap="xs">
+                {advisoriesData.map((advisory: any) => (
+                  <Text key={advisory.id} size="xs">- {advisory.actionPlan}</Text>
+                ))}
+              </Stack>
+            </Card>
+          ) : !isAdvisoriesLoading && (
+            <Alert variant="light" color="yellow" title="No Preventive Measurements">
+              There are currently no preventive measurements available. Please check back later.
+            </Alert>
+          )}
+        </>
       ) : (
         <Center py="xl">
           <Loader size="lg" />

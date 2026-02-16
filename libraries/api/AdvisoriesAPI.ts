@@ -82,6 +82,13 @@ export const getAdvisories = async (
 };
 
 /**
+ * Get all advisories without pagination
+ */
+export const getAllAdvisories = async (): Promise<CommunityAdvisory[]> => {
+	return api.get<CommunityAdvisory[]>(baseApiGroup + "all");
+};
+
+/**
  * Get a single advisory by ID
  */
 export const getAdvisoryById = async (
@@ -118,6 +125,7 @@ export const deleteAdvisory = async (id: string): Promise<void> => {
 
 const AdvisoriesAPI = {
 	getAdvisories,
+	getAllAdvisories,
 	getAdvisoryById,
 	createAdvisory,
 	updateAdvisory,

@@ -18,4 +18,8 @@ export const WeatherPoolingData = {
     const historicalData = api.get<LatestWeatherDate>(baseApiGroup + "latest/");
     return historicalData;
   },
+  manualTriggerWeatherPooling: () => {
+    const result = api.post(baseApiGroup + "manual-trigger", {});
+    return result;
+  },
 };
