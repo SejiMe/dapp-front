@@ -16,6 +16,7 @@
     "@mantine/notifications": "^8.3.6",
     "@supabase/ssr": "^0.7.0",
     "@tabler/icons-react": "^3.36.1",
+    "@microsoft/signalr": "^7.0.6",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "daisyui": "^5.5.0",

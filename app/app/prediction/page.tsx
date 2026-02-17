@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Select, Stack, Text, Paper, Tabs } from "@mantine/core";
 import { IconChartBar, IconInfoCircle } from "@tabler/icons-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ChartsTab from "./ChartsTab";
 import InformationTab from "./InformationTab";
 import { useBarangaySelectionStore } from "@/libraries/stores/useBarangaySelectionStore";
@@ -15,7 +15,19 @@ const DashboardPage = (props: Props) => {
   const pathname = usePathname();
   const municipalityPsgcCode = "0931700000";
 
-  const activeTab = useSearchParams().get("tab") || "information";
+  const [activeTab, setActiveTab] = useState<string>("information");
+
+  useEffect(() => {
+    // read from browser URL on client only to avoid pre-render bailout
+    try {
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const params = new URLSearchParams(search);
+      const tab = params.get("tab") || "information";
+      setActiveTab(tab);
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const { SelectedBarangay, SelectBarangay, ClearSelection } =
     useBarangaySelectionStore();
@@ -37,9 +49,10 @@ const DashboardPage = (props: Props) => {
     [barangays],
   );
 
-   const handleTabChange = (value: string | null) => {
+  const handleTabChange = (value: string | null) => {
     if (value) {
-      // Update URL with new tab
+      setActiveTab(value);
+      // Update URL with new tab without full reload
       router.push(`${pathname}?tab=${value}`);
     }
   };

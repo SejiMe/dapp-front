@@ -20,13 +20,37 @@ const AboutUs = forwardRef<HTMLDivElement>((_, ref) => {
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Stack gap="lg">
               <Title order={2} size="3.5rem">
-                About Us
+                About Dengue Watch
               </Title>
               <Text size="lg" lh={1.7} c="dimmed">
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Perferendis sed assumenda excepturi dignissimos officiis.
-                Facilis recusandae eum sapiente, quasi nesciunt dolores
-                expedita, natus unde laborum in fugiat quo, veritatis qui.
+                Dengue Watch is an open, community-oriented project that aims
+                to give local health teams, researchers, and community
+                organizations better tools to predict and prevent dengue
+                outbreaks. We combine public and anonymized local data sources
+                with weather and geospatial analysis to produce weekly risk
+                forecasts and visual dashboards that are easy to understand and
+                act on.
+              </Text>
+
+              <Text size="lg" lh={1.7} c="dimmed">
+                Our goals:
+                <br />
+                - Provide timely, localized risk information for targeted
+                interventions.
+                <br />
+                - Make model training and data workflows transparent and
+                reproducible for public health teams.
+                <br />
+                - Encourage collaboration: share datasets, report issues, and
+                contribute improvements via the project's repository.
+              </Text>
+
+              <Text size="lg" lh={1.7} c="dimmed">
+                We take privacy and responsible use seriously — the platform
+                is designed to work with aggregated or anonymized inputs. If
+                you'd like to contribute data, suggest features, or help with
+                development, please see the repository README for contribution
+                guidelines and contact information.
               </Text>
             </Stack>
           </Grid.Col>

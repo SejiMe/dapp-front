@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Tabs, Card, Button, Text, Group, TextInput, Stack, useMantineTheme, Select, Alert, Divider } from "@mantine/core";
+import { Tabs, Card, Button, Text, Group, TextInput, Stack, useMantineTheme, Select, Alert, Divider, Loader, Checkbox } from "@mantine/core";
 import TrainingAPI from "@/libraries/api/TrainingAPI";
 import AdminDengueAPI from "@/libraries/api/AdminDengueAPI";
 import WeatherSummaryAPI from "@/libraries/api/WeatherSummaryAPI";
+import useSWR from "swr";
 import { Localities } from "@/libraries/api/AdministrativeAreaAPI";
 import { WeatherPoolingData } from "@/libraries/api/WeatherPoolingAPI";
-import { showNotification } from "@mantine/notifications";
+import { showNotification, updateNotification } from "@mantine/notifications";
+import { HubConnectionBuilder, LogLevel, HubConnection } from "@microsoft/signalr";
 import AuthAPI, { getStoredUser, decodeJwt, storeUser } from "@/libraries/api/Auth";
 import { useRouter } from "next/dist/client/components/navigation";
 import { MantineCalendar } from "@/libraries/ui/MantineCalendar";
@@ -20,8 +22,19 @@ export default function AdminPage() {
 
 
   const [modelInfo, setModelInfo] = useState<any>(null);
+  const { data: swModelInfo, mutate: mutateModelInfo } = useSWR("/api/training-data/model-info", () => TrainingAPI.getAdvanceModelInfo(), { revalidateOnFocus: false });
+  const [isTraining, setIsTraining] = useState(false);
+  const [operationId, setOperationId] = useState<string | null>(null);
+  const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
   const [psgc, setPsgc] = useState("");
   const [date, setDate] = useState("");
+  const [csvYears, setCsvYears] = useState<string>(new Date().getUTCFullYear().toString());
+  const [csvPsgc, setCsvPsgc] = useState<string>("0931700000");
+  const [csvExcludePsgc, setCsvExcludePsgc] = useState<boolean>(false);
+  const [csvWeekNumber, setCsvWeekNumber] = useState<string>("");
+  const [csvWeekFrom, setCsvWeekFrom] = useState<string>("");
+  const [csvWeekTo, setCsvWeekTo] = useState<string>("");
+  const [csvRequestKey, setCsvRequestKey] = useState<string | null>(null);
   const [barangays, setBarangays] = useState<Array<{ value: string; label: string }>>([]);
   const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null);
 
@@ -49,10 +62,79 @@ export default function AdminPage() {
     };
   }, []);
 
+  // SWR-driven CSV generation
+  const { data: csvBlob, error: csvError } = useSWR(
+    csvRequestKey ? ["training-csv", csvRequestKey] : null,
+    () => TrainingAPI.generateWeeklyWeatherCsv(JSON.parse(csvRequestKey || "null")),
+    { revalidateOnFocus: false }
+  );
+
   useEffect(() => {
-    TrainingAPI.getAdvanceModelInfo()
-      .then((d) => setModelInfo(d))
-      .catch(() => {});
+    if (csvBlob) {
+      const href = URL.createObjectURL(csvBlob as any);
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = "weekly-training-data-all.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+      updateNotification({ id: "csv-download", title: "CSV downloaded", message: "weekly-training-data-all.csv saved — check your browser downloads.", color: "teal", loading: false, autoClose: 5000 });
+      setCsvRequestKey(null);
+    }
+  }, [csvBlob]);
+
+  useEffect(() => {
+    if (csvError && csvRequestKey) {
+      updateNotification({ id: "csv-download", title: "CSV failed", message: (csvError as Error).message || "Failed to generate CSV", color: "red", loading: false, autoClose: 8000 });
+      setCsvRequestKey(null);
+    }
+  }, [csvError, csvRequestKey]);
+
+  useEffect(() => {
+    if (swModelInfo) setModelInfo(swModelInfo);
+    // establish signalR connection for training updates
+    const base = process.env.NEXT_PUBLIC_DENGUE_API?.replace(/\/$/, "") || "";
+    const hub = new HubConnectionBuilder()
+      .withUrl(`${base}/hubs/notifications`)
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Information)
+      .build();
+
+    hub.start()
+      .then(() => {
+        hub.on("TrainingStarted", (payload: any) => {
+          setIsTraining(true);
+          setOperationId(payload?.OperationId || null);
+          showNotification({ title: "Training", message: "Training started", loading: true });
+        });
+
+        hub.on("TrainingCompleted", (payload: any) => {
+          setIsTraining(false);
+          setOperationId(null);
+          // payload may contain ModelInfo and Metrics
+          if (payload?.ModelInfo) setModelInfo(payload.ModelInfo);
+          else TrainingAPI.getAdvanceModelInfo().then((d) => setModelInfo(d)).catch(() => {});
+          // update SWR cache
+          mutateModelInfo();
+          showNotification({ title: "Training", message: "Training completed", color: "teal" });
+        });
+
+        hub.on("TrainingFailed", (payload: any) => {
+          setIsTraining(false);
+          setOperationId(null);
+          showNotification({ title: "Training Failed", message: payload?.Error || "Unknown error", color: "red" });
+        });
+      })
+      .catch((e) => console.warn("SignalR failed to start", e));
+
+    setHubConnection(hub);
+
+    return () => {
+      try {
+        hub.stop();
+      } catch {}
+    };
   }, []);
 
    useEffect(() => {
@@ -100,9 +182,13 @@ export default function AdminPage() {
     appendLog("Starting advanced training...");
     await ensureFreshAccess();
     try {
-      await TrainingAPI.trainAdvanceModel();
-      appendLog("Advanced training started");
-      showNotification({ title: "Training", message: "Advanced training started" });
+      const res: any = await TrainingAPI.trainAdvanceModel();
+      // server returns operation id for queued training
+      const opId = typeof res === "string" ? res : res?.operationId || res;
+      setOperationId(opId || null);
+      setIsTraining(true);
+      appendLog("Advanced training queued");
+      showNotification({ title: "Training", message: "Training queued", loading: true });
     } catch (e) {
       appendLog("Advanced training failed");
       showNotification({ title: "Error", message: "Advanced training failed" });
@@ -215,9 +301,72 @@ export default function AdminPage() {
                 before initiating training.
               </Text>
             </Alert>
+            <Alert variant="light" color="yellow" title="Training CSV">
+              <Text size="sm">
+                To generate training data CSV, click "Generate Training CSV (All)". Download the CSV,
+                edit or remove rows not needed for training, then replace the file at
+                <br />
+                <Text component="span" fw={700}>dengue-watch-api/infrastructure/ml/data/adv-weekly-training-data.csv</Text>
+                <br />
+                After replacing the file, return here and press "Train Advanced" to enqueue model training.
+              </Text>
+            </Alert>
+                    <Stack gap="xs">
+                      <Text size="sm">CSV Parameters</Text>
+                      <TextInput label="PSGC Code" value={csvPsgc} onChange={(e) => setCsvPsgc(e.target.value)} />
+                      <TextInput label="Years (comma separated)" value={csvYears} onChange={(e) => setCsvYears(e.target.value)} />
+                      <TextInput label="Week Number (optional)" value={csvWeekNumber} onChange={(e) => setCsvWeekNumber(e.target.value)} />
+                      <Group>
+                        <TextInput placeholder="Week From" value={csvWeekFrom} onChange={(e) => setCsvWeekFrom(e.target.value)} w={120} />
+                        <TextInput placeholder="Week To" value={csvWeekTo} onChange={(e) => setCsvWeekTo(e.target.value)} w={120} />
+                      </Group>
+                      <Group>
+                        <Checkbox label="Exclude PSGC in result" checked={csvExcludePsgc} onChange={(e) => setCsvExcludePsgc(e.currentTarget.checked)} />
+                        <Button
+                          color="gray"
+                          onClick={async () => {
+                            await ensureFreshAccess();
+                            try {
+                              const years = csvYears.split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n));
+                              if (years.length === 0) {
+                                showNotification({ title: "Error", message: "Provide at least one year" });
+                                return;
+                              }
+                              const body: any = {
+                                PsgcCode: csvPsgc,
+                                isPsgcExcludedInResult: csvExcludePsgc,
+                                Years: years,
+                              } as any;
+                              if (csvWeekNumber) body.WeekNumber = parseInt(csvWeekNumber, 10);
+                              if (csvWeekFrom && csvWeekTo) body.WeekRange = { From: parseInt(csvWeekFrom, 10), To: parseInt(csvWeekTo, 10) };
+
+                              // Trigger SWR fetcher by setting a serialized key
+                              setCsvRequestKey(JSON.stringify(body));
+                              // show a persistent loading notification we can update later
+                              showNotification({ id: "csv-download", title: "CSV", message: "Generating training CSV...", loading: true, autoClose: true });
+                            } catch (e: any) {
+                              console.error(e);
+                              showNotification({ title: "Error", message: e?.message || "Failed to generate CSV" });
+                            }
+                          }}
+                        >
+                          Generate Training CSV (All)
+                        </Button>
+                        <Button variant="outline" onClick={() => { setCsvYears(new Date().getUTCFullYear().toString()); setCsvPsgc("0931700000"); setCsvExcludePsgc(false); setCsvWeekFrom(""); setCsvWeekTo(""); setCsvWeekNumber(""); }}>Reset</Button>
+                      </Group>
+                    </Stack>
             <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(modelInfo, null, 2)}</pre>
             <Group>
-              <Button onClick={handleTrainAdvance}>Train Advanced</Button>
+              <Button onClick={handleTrainAdvance} disabled={isTraining}>
+                {isTraining ? (
+                  <>
+                    <Loader size="xs" style={{ marginRight: 8 }} /> Training...
+                  </>
+                ) : (
+                  "Train Advanced"
+                )}
+              </Button>
+              {operationId && <Text size="sm">Operation: {operationId}</Text>}
             </Group>
           </Stack>
         </Tabs.Panel>

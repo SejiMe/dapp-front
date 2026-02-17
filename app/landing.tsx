@@ -48,11 +48,17 @@ const Landing = () => {
           </Title>
 
           <Text c="white" size="lg" lh={1.6}>
-            D-APP is a web app that uses real-time data and time series analysis
-            to predict future dengue outbreaks. By analyzing weather patterns,
-            historical case data, and geographic trends, the app provides early
-            warnings, risk level maps, and health tips empowering users and
-            health officials to take preventive action before outbreaks occur.
+            Dengue Watch helps local health teams, researchers, and community
+            volunteers anticipate and reduce dengue outbreaks. The project
+            combines historical dengue case data, aggregated weather signals,
+            and geospatial context to produce weekly risk forecasts,
+            outbreak-probability scores, and easy-to-read dashboards.
+            
+            This is a community-focused, open approach — administrators can
+            generate training datasets, retrain models from the web UI, and
+            track model versions so predictions stay current as new data are
+            added. Our goal is to empower local decision makers with timely
+            insights so interventions can be targeted where they matter most.
           </Text>
 
           <Button
