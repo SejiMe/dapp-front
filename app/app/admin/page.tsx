@@ -14,6 +14,7 @@ import AuthAPI, { getStoredUser, decodeJwt, storeUser } from "@/libraries/api/Au
 import { useRouter } from "next/dist/client/components/navigation";
 import { MantineCalendar } from "@/libraries/ui/MantineCalendar";
 import { AdvisoryManagement } from "./AdvisoryManagement";
+import { WeeklyDengueCasesManagement } from "./WeeklyDengueCasesManagement";
 
 
 export default function AdminPage() {
@@ -288,6 +289,7 @@ export default function AdminPage() {
           <Tabs.Tab value="model">Model</Tabs.Tab>
           <Tabs.Tab value="predictions">Predictions</Tabs.Tab>
           <Tabs.Tab value="weather">Weather</Tabs.Tab>
+          <Tabs.Tab value="weekly-cases">Weekly Cases</Tabs.Tab>
           <Tabs.Tab value="advisories">Advisories</Tabs.Tab>
         </Tabs.List>
 
@@ -418,6 +420,10 @@ export default function AdminPage() {
               <Button onClick={handleManualWeatherPooling}>Manual Weather Pooling</Button>
             </Group>
           </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="weekly-cases" style={{ paddingTop: theme.spacing.xs }}>
+          <WeeklyDengueCasesManagement />
         </Tabs.Panel>
 
         <Tabs.Panel value="advisories" style={{ paddingTop: theme.spacing.xs }}>
