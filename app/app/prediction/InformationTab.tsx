@@ -14,7 +14,7 @@ import YearlyAverageCard from "@/components/app/YearlyAverageCard";
 import useSWR from "swr";
 import { PredictedDengueCase } from "@/models/PredictedDengueCase";
 import { DengueCasesAPI } from "@/libraries/api/DengueAPI";
-import AdvisoriesAPI, { RiskLevel } from "@/libraries/api/AdvisoriesAPI";
+import AdvisoriesAPI, { CommunityAdvisory, RiskLevel } from "@/libraries/api/AdvisoriesAPI";
 import { YearlyAverageResponse } from "@/models/Statistics";
 import { ApiError } from "@/libraries/api/Client";
 import useSWRMutation from "swr/mutation";
@@ -41,11 +41,6 @@ const InformationTab = () => {
   // Get current year from selected date
   const currentYear = isoYear;
 
-  console.log("🔍 InformationTab State:", {
-    hasHydrated,
-    selectedDateISO,
-    stringDate,
-  });
 
 
   if (getWeekDateRange() == null) redirect("/app/calendar");
@@ -141,7 +136,7 @@ const InformationTab = () => {
   }
 
   const dates = getWeekDateRangeString().split(" ");
-
+  
   return (
     <Stack gap="md" align="center">
       <Title order={3} ta="center">
@@ -182,7 +177,7 @@ const InformationTab = () => {
                 Preventive Measurements
               </Text>
               <Stack gap="xs">
-                {advisoriesData.map((advisory: any) => (
+                {advisoriesData.filter(item => item.isActive === true && item.riskLevel === convertRiskLevel(riskResult.riskLevel)).map((advisory: CommunityAdvisory) => (
                   <Text key={advisory.id} size="xs">- {advisory.actionPlan}</Text>
                 ))}
               </Stack>

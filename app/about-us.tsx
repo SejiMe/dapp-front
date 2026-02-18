@@ -47,10 +47,6 @@ const AboutUs = forwardRef<HTMLDivElement>((_, ref) => {
 
               <Text size="lg" lh={1.7} c="dimmed">
                 We take privacy and responsible use seriously — the platform
-                is designed to work with aggregated or anonymized inputs. If
-                you'd like to contribute data, suggest features, or help with
-                development, please see the repository README for contribution
-                guidelines and contact information.
               </Text>
             </Stack>
           </Grid.Col>

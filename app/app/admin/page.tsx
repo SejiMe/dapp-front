@@ -287,8 +287,8 @@ export default function AdminPage() {
       <Tabs defaultValue="model">
         <Tabs.List>
           <Tabs.Tab value="model">Model</Tabs.Tab>
-          <Tabs.Tab value="predictions">Predictions</Tabs.Tab>
-          <Tabs.Tab value="weather">Weather</Tabs.Tab>
+          {/* <Tabs.Tab value="predictions">Predictions</Tabs.Tab>
+          <Tabs.Tab value="weather">Weather</Tabs.Tab> */}
           <Tabs.Tab value="weekly-cases">Weekly Cases</Tabs.Tab>
           <Tabs.Tab value="advisories">Advisories</Tabs.Tab>
         </Tabs.List>
@@ -372,8 +372,9 @@ export default function AdminPage() {
             </Group>
           </Stack>
         </Tabs.Panel>
-
-        <Tabs.Panel value="predictions" style={{ paddingTop: theme.spacing.xs }}>
+                {
+                  /**
+                   * <Tabs.Panel value="predictions" style={{ paddingTop: theme.spacing.xs }}>
           <Stack gap="sm">
             <Text fw={600}>Manual Predictions</Text>
             <Alert variant="light" color="blue" title="Disclaimer">
@@ -421,6 +422,9 @@ export default function AdminPage() {
             </Group>
           </Stack>
         </Tabs.Panel>
+                   */
+                }
+        
 
         <Tabs.Panel value="weekly-cases" style={{ paddingTop: theme.spacing.xs }}>
           <WeeklyDengueCasesManagement />
